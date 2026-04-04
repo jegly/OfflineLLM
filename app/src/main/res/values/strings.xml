@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OfflineLLM</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Welcome to offlineLLM</string>
+    <string name="onboarding_welcome_desc">Your private AI assistant. All processing happens on-device. No internet. No tracking. No cloud.</string>
+    <string name="onboarding_model_title">Setting Up Your Model</string>
+    <string name="onboarding_model_desc">Preparing the AI model for first use. This only happens once.</string>
+    <string name="onboarding_prompt_title">Choose Your Assistant</string>
+    <string name="onboarding_prompt_desc">Select a system prompt to define your assistant\'s personality.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_copying_model">Copying model… %1$d%%</string>
+
+    <!-- Chat -->
+    <string name="chat_new">New Chat</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_stop">Stop</string>
+    <string name="chat_hint">Type a message…</string>
+    <string name="chat_delete_confirm">Delete this conversation?</string>
+    <string name="chat_generating">Generating…</string>
+    <string name="chat_tokens_per_sec">%.1f tok/s</string>
+    <string name="chat_no_model">No model loaded</string>
+    <string name="chat_conversations">Conversations</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_model">Model</string>
+    <string name="settings_active_model">Active Model</string>
+    <string name="settings_import_gguf">Import GGUF Model</string>
+    <string name="settings_generation">Generation</string>
+    <string name="settings_temperature">Temperature</string>
+    <string name="settings_max_tokens">Max Tokens</string>
+    <string name="settings_context_size">Context Size</string>
+    <string name="settings_system_prompt">System Prompt</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_biometric_lock">Biometric Lock</string>
+    <string name="settings_data">Data Management</string>
+    <string name="settings_export_chats">Export Chats as JSON</string>
+    <string name="settings_import_chats">Import Chats from JSON</string>
+    <string name="settings_clear_all">Clear All Chats</string>
+    <string name="settings_clear_confirm">Type DELETE to confirm</string>
+    <string name="settings_no_model">No model selected</string>
+
+    <!-- Errors -->
+    <string name="error_model_missing">Model file not found. Please import a GGUF model in Settings.</string>
+    <string name="error_oom">Low memory. Try clearing the KV cache or using a smaller model.</string>
+    <string name="error_timeout">Generation timed out after 30 seconds.</string>
+    <string name="error_import_invalid">Invalid file. Only GGUF format models are supported.</string>
+    <string name="error_biometric_not_enrolled">No biometric credentials enrolled. Set up fingerprint or face unlock in device settings.</string>
+
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+</resources>
