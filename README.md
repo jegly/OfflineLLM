@@ -17,7 +17,6 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 [![Android](https://img.shields.io/badge/Android-14%2B-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-orange.svg)](https://github.com/ggerganov/llama.cpp)
-[![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 
 </div>
