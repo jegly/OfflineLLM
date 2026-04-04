@@ -1,8 +1,6 @@
 <div align="center">
-  
-<div align="center">
+
 <img src="Screenshots/offlinellm-banner.png" width="600" />
-</div>
 
 **A fully offline, private AI chat app for Android**
 
@@ -10,13 +8,11 @@ The only Android LLM app that literally cannot phone home.
 All LLM inference runs entirely on-device via llama.cpp.
 No internet. No cloud. No tracking. Your conversations stay yours.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Android](https://img.shields.io/badge/Android-14%2B-green.svg)]()
-[![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-14%2B-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-orange.svg)](https://github.com/ggerganov/llama.cpp)
+[![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 
 </div>
@@ -45,5 +41,133 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 - **On-Device Inference** — Runs GGUF models via llama.cpp with optimized ARM NEON/SVE/i8mm native libraries
 - **Streaming Responses** — Token-by-token output (~25 tok/s on budget devices, 40-60+ on flagships)
 - **Import Any Model** — Bring your own GGUF models at runtime via file picker
+- **Multiple Conversations** — Auto-titled from your first message, renameable, searchable
+- **Advanced Sampling** — Temperature, Top-P, Top-K, Min-P, Repeat Penalty with explanations
+- **Theming** — System/Light/Dark/AMOLED Black + 9 accent colour options
+- **System Prompts** — General, Coder, Creative Writer, Tutor, or write your own
+- **Text-to-Speech** — Read AI responses aloud using your device's TTS engine
+- **Thinking Tag Stripping** — Hides `<think>` blocks from reasoning models like Qwen
+- **Security** — Encrypted settings, optional biometric lock, secure file deletion
+- **Chat Backup** — Export/import all conversations as JSON
+- **Built-in Help** — Guide for downloading models from HuggingFace
 
+---
 
+## Recommended Models
+
+| Model | Size | Best For |
+|---|---|---|
+| Gemma 3 270M Q4_K_M | ~300 MB | 4GB RAM devices, fast responses |
+| Qwen3.5 0.8B Q4_K_M | ~530 MB | Good balance for 4-6GB RAM |
+| Gemma 3 1B Q4_K_M | ~750 MB | Recommended for 6-8GB RAM |
+| Qwen3.5 4B Q4_K_M | ~2.5 GB | Best quality for 8GB+ RAM |
+
+Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Choose `Q4_K_M` quantization for best quality/speed balance.
+
+---
+
+## Install
+
+1. Download the APK from [Releases](https://github.com/jegly/OfflineLLM/releases)
+2. On your device: **Settings → Apps → Install unknown apps** → allow your file manager
+3. Open the APK and tap Install
+4. Complete onboarding and import a GGUF model from Settings
+
+Or via ADB:
+```bash
+adb install OfflineLLM-v2.0.0-release.apk
+```
+
+---
+
+## Build from Source
+
+### Prerequisites
+
+- JDK 17, Android SDK (compileSdk 36), NDK r27, CMake 3.22.1
+
+```bash
+git clone --recurse-submodules https://github.com/jegly/OfflineLLM.git
+cd OfflineLLM
+
+# Optional: bundle a model in the APK
+cp /path/to/model.gguf app/src/main/assets/model/
+
+# Build
+./gradlew assembleDebug
+```
+
+First build compiles llama.cpp from source (~15-20 min). Subsequent builds are fast.
+
+---
+
+## Architecture
+
+```
+OfflineLLM/
+├── smollm/              ← Native llama.cpp JNI module
+│   └── src/main/
+│       ├── cpp/         ← C++ inference engine + JNI bridge
+│       └── java/        ← SmolLM.kt, GGUFReader.kt wrappers
+├── app/                 ← Main Android application
+│   └── src/main/java/com/jegly/offlineLLM/
+│       ├── ai/          ← InferenceEngine, ModelManager, SystemPrompts
+│       ├── data/        ← Room database, DAOs, repositories
+│       ├── di/          ← Hilt dependency injection modules
+│       ├── ui/          ← Compose screens, components, theme, navigation
+│       └── utils/       ← BiometricHelper, MemoryMonitor, SecurityUtils, TTS
+└── llama.cpp/           ← Git submodule
+```
+
+---
+
+## Performance
+
+| Device Tier | RAM | Expected Speed |
+|---|---|---|
+| Budget (ZTE, etc.) | 4 GB | ~25 tok/s with 270M model |
+| Mid-range (Pixel 7) | 6-8 GB | 30-50 tok/s with 1B model |
+| Flagship (Pixel 10 Pro) | 12-16 GB | 40-60+ tok/s with 4B model |
+
+---
+
+## Sampling Parameters
+
+OfflineLLM gives you full control over how the model generates text:
+
+| Parameter | Default | What It Does |
+|---|---|---|
+| Temperature | 0.7 | Controls randomness. Lower = focused. Higher = creative. |
+| Top-P | 0.9 | Nucleus sampling. Only considers tokens above this cumulative probability. |
+| Top-K | 40 | Limits selection to the K most likely tokens. |
+| Min-P | 0.1 | Filters tokens below this fraction of the top token's probability. |
+| Repeat Penalty | 1.1 | Penalises repeated tokens. 1.0 = no penalty. |
+| Context Size | 4096 | How many tokens of conversation history the model can see. |
+
+---
+
+## Security & Privacy
+
+- **Zero network permissions** — no INTERNET, no ACCESS_NETWORK_STATE
+- **No Google Play Services** or Firebase dependencies
+- **Encrypted settings** via Jetpack Security
+- **Optional biometric lock**
+- **Memory Tagging Extension** enabled (`memtagMode="sync"`)
+- **Secure deletion** — files overwritten before removal
+- **No logging** of prompts or responses
+
+---
+
+## License
+
+Apache License 2.0
+
+llama.cpp backend: MIT License. Native wrapper adapted from [SmolChat-Android](https://github.com/shubham0204/SmolChat-Android) (Apache 2.0).
+
+---
+
+<div align="center">
+
+**[www.jegly.xyz](https://www.jegly.xyz)**
+
+</div>
