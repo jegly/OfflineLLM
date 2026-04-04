@@ -1,4 +1,4 @@
-# offlineLLM
+# OfflineLLM
 
 A fully offline, private AI chat assistant for Android. All inference runs on-device using [llama.cpp](https://github.com/ggerganov/llama.cpp). Zero cloud dependency, zero tracking, zero network permissions.
 
