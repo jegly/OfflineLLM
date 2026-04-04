@@ -16,3 +16,15 @@
 # Keep serialization
 -keepattributes *Annotation*
 -keep class kotlinx.serialization.** { *; }
+
+# Tink crypto (used by EncryptedSharedPreferences)
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.auto.value.**
+-keep class com.google.crypto.tink.** { *; }
+
+# Google API client (transitive from Tink)
+-dontwarn com.google.api.client.**
+-dontwarn org.joda.time.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.auto.value.**
