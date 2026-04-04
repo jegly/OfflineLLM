@@ -113,6 +113,7 @@ class InferenceEngine {
                     val duration = measureTime {
                         instance.getResponseAsFlow(query).collect { piece ->
                             response += piece
+                            // Strip think tags from streaming display
                             val cleanPartial = response
                                 .replace(Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL), "")
                                 .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "")
@@ -123,17 +124,29 @@ class InferenceEngine {
                         }
                     }
 
-                    // Strip <think>...</think> tags from response
+                    // Strip think tags from final response
                     val cleanResponse = response
                         .replace(Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL), "")
-                        .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "") // unclosed think tag
+                        .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "")
                         .trim()
+
+                    // Fix empty response: if model returned nothing useful, provide fallback
+                    val finalResponse = if (cleanResponse.isBlank()) {
+                        if (response.isNotBlank()) {
+                            // Had content but it was all thinking tags
+                            "(The model only produced internal reasoning with no visible response. Try rephrasing your question.)"
+                        } else {
+                            "(Empty response from model. The model may need a different prompt or temperature setting.)"
+                        }
+                    } else {
+                        cleanResponse
+                    }
 
                     withContext(Dispatchers.Main) {
                         isGenerating = false
                         onComplete(
                             GenerationResult(
-                                response = cleanResponse,
+                                response = finalResponse,
                                 tokensPerSecond = instance.getResponseGenerationSpeed(),
                                 durationSeconds = duration.inWholeSeconds.toInt(),
                                 contextLengthUsed = instance.getContextLengthUsed(),

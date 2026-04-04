@@ -7,13 +7,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -24,6 +31,9 @@ fun MessageBubble(
     content: String,
     isUser: Boolean,
     onLongPress: (() -> Unit)? = null,
+    onSpeak: (() -> Unit)? = null,
+    onStopSpeaking: (() -> Unit)? = null,
+    isSpeaking: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -51,8 +61,8 @@ fun MessageBubble(
                     onLongClick = { onLongPress?.invoke() },
                 )
         ) {
-            SelectionContainer {
-                Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                SelectionContainer {
                     Text(
                         text = content,
                         style = MaterialTheme.typography.bodyLarge,
@@ -61,6 +71,25 @@ fun MessageBubble(
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+                // TTS button for assistant messages only
+                if (!isUser && onSpeak != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        IconButton(
+                            onClick = { if (isSpeaking) onStopSpeaking?.invoke() else onSpeak() },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = if (isSpeaking) Icons.Filled.Stop else Icons.Filled.VolumeUp,
+                                contentDescription = if (isSpeaking) "Stop" else "Read aloud",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -9,8 +9,9 @@
 
 class LLMInference {
 public:
-    void loadModel(const char *model_path, float minP, float temperature, bool storeChats,
-                   long contextSize, const char *chatTemplate, int nThreads, bool useMmap, bool useMlock);
+    void loadModel(const char *model_path, float minP, float temperature, float topP, int topK,
+                   float repeatPenalty, bool storeChats, long contextSize, const char *chatTemplate,
+                   int nThreads, bool useMmap, bool useMlock);
     void addChatMessage(const char *message, const char *role);
     float getResponseGenerationTime() const;
     int getContextSizeUsed() const;

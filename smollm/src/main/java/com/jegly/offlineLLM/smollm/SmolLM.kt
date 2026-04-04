@@ -70,6 +70,9 @@ class SmolLM {
     data class InferenceParams(
         val minP: Float = 0.1f,
         val temperature: Float = 0.7f,
+        val topP: Float = 0.9f,
+        val topK: Int = 40,
+        val repeatPenalty: Float = 1.1f,
         val storeChats: Boolean = true,
         val contextSize: Long? = null,
         val chatTemplate: String? = null,
@@ -94,6 +97,9 @@ class SmolLM {
                 modelPath,
                 params.minP,
                 params.temperature,
+                params.topP,
+                params.topK,
+                params.repeatPenalty,
                 params.storeChats,
                 params.contextSize ?: modelContextSize,
                 params.chatTemplate ?: modelChatTemplate,
@@ -171,8 +177,9 @@ class SmolLM {
     }
 
     private external fun loadModel(
-        modelPath: String, minP: Float, temperature: Float, storeChats: Boolean,
-        contextSize: Long, chatTemplate: String, nThreads: Int, useMmap: Boolean, useMlock: Boolean
+        modelPath: String, minP: Float, temperature: Float, topP: Float, topK: Int,
+        repeatPenalty: Float, storeChats: Boolean, contextSize: Long, chatTemplate: String,
+        nThreads: Int, useMmap: Boolean, useMlock: Boolean
     ): Long
 
     private external fun addChatMessage(modelPtr: Long, message: String, role: String)

@@ -61,7 +61,7 @@ fun AboutScreen(
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Version 1.0.0",
+                text = "Version 2.0.0",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

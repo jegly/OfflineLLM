@@ -11,18 +11,23 @@
 #define LOGe(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
 
 void
-LLMInference::loadModel(const char *model_path, float minP, float temperature, bool storeChats, long contextSize,
+LLMInference::loadModel(const char *model_path, float minP, float temperature, float topP, int topK,
+                        float repeatPenalty, bool storeChats, long contextSize,
                         const char *chatTemplate, int nThreads, bool useMmap, bool useMlock) {
     LOGi("loading model with"
          "\n\tmodel_path = %s"
          "\n\tminP = %f"
          "\n\ttemperature = %f"
+         "\n\ttopP = %f"
+         "\n\ttopK = %d"
+         "\n\trepeatPenalty = %f"
          "\n\tstoreChats = %d"
          "\n\tcontextSize = %li"
          "\n\tnThreads = %d"
          "\n\tuseMmap = %d"
          "\n\tuseMlock = %d",
-         model_path, minP, temperature, storeChats, contextSize, nThreads, useMmap, useMlock);
+         model_path, minP, temperature, topP, topK, repeatPenalty, storeChats, contextSize,
+         nThreads, useMmap, useMlock);
 
     ggml_backend_load_all();
 
@@ -46,9 +51,32 @@ LLMInference::loadModel(const char *model_path, float minP, float temperature, b
         throw std::runtime_error("llama_new_context_with_model() returned null");
     }
 
+    // Build sampler chain with all parameters
     llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
     sampler_params.no_perf = true;
     _sampler = llama_sampler_chain_init(sampler_params);
+
+    // Add repeat penalty if enabled
+    if (repeatPenalty > 1.0f) {
+        llama_sampler_chain_add(_sampler, llama_sampler_init_penalties(256, repeatPenalty, 0.0f, 0.0f));
+    }
+
+    // Add top-k if enabled (0 = disabled)
+    if (topK > 0) {
+        llama_sampler_chain_add(_sampler, llama_sampler_init_top_k(topK));
+    }
+
+    // Add top-p if enabled
+    if (topP < 1.0f) {
+        llama_sampler_chain_add(_sampler, llama_sampler_init_top_p(topP, 1));
+    }
+
+    // Add min-p if enabled
+    if (minP > 0.0f) {
+        llama_sampler_chain_add(_sampler, llama_sampler_init_min_p(minP, 1));
+    }
+
+    // Temperature and distribution
     llama_sampler_chain_add(_sampler, llama_sampler_init_temp(temperature));
     llama_sampler_chain_add(_sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
@@ -89,7 +117,6 @@ LLMInference::startCompletion(const char *query) {
     _responseNumTokens = 0;
     addChatMessage(query, "user");
 
-    // apply the chat-template using the stable llama_chat_apply_template API
     int new_len = llama_chat_apply_template(
         _chatTemplate,
         _messages.data(),
@@ -279,7 +306,7 @@ LLMInference::benchModel(int pp, int tg, int pl, int nr) {
     std::stringstream result;
     result << std::setprecision(3);
     result << "Model: " << model_desc << " | " << model_size << " GiB | " << model_n_params << "B params\n";
-    result << "PP " << pp << ": " << pp_avg << " ± " << pp_std << " t/s\n";
-    result << "TG " << tg << ": " << tg_avg << " ± " << tg_std << " t/s\n";
+    result << "PP " << pp << ": " << pp_avg << " +/- " << pp_std << " t/s\n";
+    result << "TG " << tg << ": " << tg_avg << " +/- " << tg_std << " t/s\n";
     return result.str();
 }

@@ -28,9 +28,14 @@ class SettingsRepository @Inject constructor(
         const val KEY_TEMPERATURE = "temperature"
         const val KEY_MAX_TOKENS = "max_tokens"
         const val KEY_CONTEXT_SIZE = "context_size"
+        const val KEY_TOP_P = "top_p"
+        const val KEY_TOP_K = "top_k"
+        const val KEY_MIN_P = "min_p"
+        const val KEY_REPEAT_PENALTY = "repeat_penalty"
         const val KEY_BIOMETRIC_LOCK = "biometric_lock"
         const val KEY_ACTIVE_MODEL_ID = "active_model_id"
         const val KEY_SYSTEM_PROMPT_KEY = "system_prompt_key"
+        const val KEY_CUSTOM_SYSTEM_PROMPT = "custom_system_prompt"
         const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
         const val KEY_NUM_THREADS = "num_threads"
         const val KEY_THEME_MODE = "theme_mode"
@@ -40,6 +45,10 @@ class SettingsRepository @Inject constructor(
         const val DEFAULT_TEMPERATURE = 0.7f
         const val DEFAULT_MAX_TOKENS = 512
         const val DEFAULT_CONTEXT_SIZE = 4096
+        const val DEFAULT_TOP_P = 0.9f
+        const val DEFAULT_TOP_K = 40
+        const val DEFAULT_MIN_P = 0.1f
+        const val DEFAULT_REPEAT_PENALTY = 1.1f
         const val DEFAULT_NUM_THREADS = 4
     }
 
@@ -55,6 +64,22 @@ class SettingsRepository @Inject constructor(
         get() = prefs.getInt(KEY_CONTEXT_SIZE, DEFAULT_CONTEXT_SIZE)
         set(value) = prefs.edit().putInt(KEY_CONTEXT_SIZE, value).apply()
 
+    var topP: Float
+        get() = prefs.getFloat(KEY_TOP_P, DEFAULT_TOP_P)
+        set(value) = prefs.edit().putFloat(KEY_TOP_P, value).apply()
+
+    var topK: Int
+        get() = prefs.getInt(KEY_TOP_K, DEFAULT_TOP_K)
+        set(value) = prefs.edit().putInt(KEY_TOP_K, value).apply()
+
+    var minP: Float
+        get() = prefs.getFloat(KEY_MIN_P, DEFAULT_MIN_P)
+        set(value) = prefs.edit().putFloat(KEY_MIN_P, value).apply()
+
+    var repeatPenalty: Float
+        get() = prefs.getFloat(KEY_REPEAT_PENALTY, DEFAULT_REPEAT_PENALTY)
+        set(value) = prefs.edit().putFloat(KEY_REPEAT_PENALTY, value).apply()
+
     var biometricLock: Boolean
         get() = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
         set(value) = prefs.edit().putBoolean(KEY_BIOMETRIC_LOCK, value).apply()
@@ -66,6 +91,10 @@ class SettingsRepository @Inject constructor(
     var systemPromptKey: String
         get() = prefs.getString(KEY_SYSTEM_PROMPT_KEY, "default") ?: "default"
         set(value) = prefs.edit().putString(KEY_SYSTEM_PROMPT_KEY, value).apply()
+
+    var customSystemPrompt: String
+        get() = prefs.getString(KEY_CUSTOM_SYSTEM_PROMPT, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_CUSTOM_SYSTEM_PROMPT, value).apply()
 
     var onboardingComplete: Boolean
         get() = prefs.getBoolean(KEY_ONBOARDING_COMPLETE, false)

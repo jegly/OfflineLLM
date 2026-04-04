@@ -257,6 +257,11 @@ fun ChatScreen(
                             content = message.content,
                             isUser = message.role == "user",
                             onLongPress = { deleteTarget = message },
+                            onSpeak = if (message.role == "assistant") {
+                                { viewModel.speakMessage(message.id, message.content) }
+                            } else null,
+                            onStopSpeaking = { viewModel.stopSpeaking() },
+                            isSpeaking = uiState.speakingMessageId == message.id,
                         )
                     }
 

@@ -15,6 +15,7 @@ import com.jegly.offlineLLM.data.repository.ExportedChat
 import com.jegly.offlineLLM.data.repository.ExportedMessage
 import com.jegly.offlineLLM.data.repository.SettingsRepository
 import com.jegly.offlineLLM.utils.MemoryMonitor
+import com.jegly.offlineLLM.utils.TtsHelper
 import com.jegly.offlineLLM.utils.SecurityUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,7 @@ data class ChatUiState(
     val memoryStatus: com.jegly.offlineLLM.utils.MemoryStatus? = null,
     val showConversationDrawer: Boolean = false,
     val errorMessage: String? = null,
+    val speakingMessageId: String? = null,
 )
 
 @HiltViewModel
@@ -54,6 +56,7 @@ class ChatViewModel @Inject constructor(
     val uiState: StateFlow<ChatUiState> = _uiState
 
     private val memoryMonitor = MemoryMonitor(application)
+    private val ttsHelper = TtsHelper(application)
 
     init {
         setupCollectors()
@@ -304,8 +307,23 @@ class ChatViewModel @Inject constructor(
         return Json { prettyPrint = true }.encodeToString(data)
     }
 
+    fun speakMessage(messageId: String, text: String) {
+        _uiState.update { it.copy(speakingMessageId = messageId) }
+        ttsHelper.speak(text) {
+            _uiState.update { it.copy(speakingMessageId = null) }
+        }
+    }
+
+    fun stopSpeaking() {
+        ttsHelper.stop()
+        _uiState.update { it.copy(speakingMessageId = null) }
+    }
+
+
+
     override fun onCleared() {
         super.onCleared()
         memoryMonitor.stopMonitoring()
+        ttsHelper.shutdown()
     }
 }

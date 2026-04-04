@@ -11,5 +11,7 @@ data class Conversation(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val messageCount: Int = 0,
-    val systemPromptKey: String = "default"
+    val systemPromptKey: String = "default",
+    val customSystemPrompt: String = "",
+    val modelId: Long = -1L  // -1 means use global default
 )

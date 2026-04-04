@@ -34,13 +34,8 @@ class ModelManager(
     private val _modelState = MutableStateFlow<ModelState>(ModelState.NotLoaded)
     val modelState: StateFlow<ModelState> = _modelState
 
-    /**
-     * Copy bundled model from assets to internal storage on first launch.
-     * Returns the path to the model file.
-     */
     suspend fun copyBundledModelIfNeeded(): Result<File> = withContext(Dispatchers.IO) {
         try {
-            // Check if any model exists in the assets folder
             val assetModels = try {
                 context.assets.list("model")?.filter { it.endsWith(".gguf") } ?: emptyList()
             } catch (_: Exception) {
@@ -55,12 +50,10 @@ class ModelManager(
             val modelFile = File(modelsDir, assetFileName)
 
             if (modelFile.exists()) {
-                // Register in DB if not already there
                 registerModelIfNeeded(modelFile, isBundled = true)
                 return@withContext Result.success(modelFile)
             }
 
-            // Copy with progress
             context.assets.open("model/$assetFileName").use { input ->
                 val totalSize = input.available().toLong()
                 modelFile.outputStream().use { output ->
@@ -85,9 +78,6 @@ class ModelManager(
         }
     }
 
-    /**
-     * Import a GGUF model from a user-selected URI.
-     */
     suspend fun importModel(uri: Uri): Result<ModelInfo> = withContext(Dispatchers.IO) {
         try {
             val fileName = getFileNameFromUri(uri) ?: "imported_${System.currentTimeMillis()}.gguf"
@@ -98,14 +88,12 @@ class ModelManager(
 
             val destFile = File(modelsDir, fileName)
 
-            // Copy file
             context.contentResolver.openInputStream(uri)?.use { input ->
                 destFile.outputStream().use { output ->
                     input.copyTo(output, bufferSize = 8192)
                 }
             } ?: return@withContext Result.failure(Exception("Could not read selected file"))
 
-            // Validate GGUF format
             if (!validateGGUF(destFile)) {
                 destFile.delete()
                 return@withContext Result.failure(Exception("Invalid GGUF file format"))
@@ -118,9 +106,6 @@ class ModelManager(
         }
     }
 
-    /**
-     * Load a model and prepare the inference engine.
-     */
     suspend fun loadModel(
         modelId: Long,
         systemPrompt: String = "",
@@ -143,11 +128,14 @@ class ModelManager(
             return
         }
 
-        // Unload any existing model
         inferenceEngine.unloadModel()
 
         val params = SmolLM.InferenceParams(
             temperature = settingsRepository.temperature,
+            topP = settingsRepository.topP,
+            topK = settingsRepository.topK,
+            minP = settingsRepository.minP,
+            repeatPenalty = settingsRepository.repeatPenalty,
             contextSize = settingsRepository.contextSize.toLong(),
             numThreads = settingsRepository.numThreads,
         )
@@ -175,7 +163,6 @@ class ModelManager(
     }
 
     suspend fun getAvailableModels(): List<ModelInfo> {
-        // Clean up DB entries for models whose files no longer exist
         val models = chatRepository.getAllModelsSync()
         for (model in models) {
             if (!File(model.path).exists()) {
@@ -200,7 +187,6 @@ class ModelManager(
         val existing = chatRepository.getModelByPath(file.absolutePath)
         if (existing != null) return existing
 
-        // Read metadata from GGUF
         var contextSize = 2048
         var chatTemplate = ""
         try {
@@ -221,7 +207,6 @@ class ModelManager(
         val id = chatRepository.addModel(modelInfo)
         val savedModel = modelInfo.copy(id = id)
 
-        // Auto-select if no active model
         if (settingsRepository.activeModelId == -1L) {
             settingsRepository.activeModelId = id
         }
@@ -234,7 +219,6 @@ class ModelManager(
             file.inputStream().use { input ->
                 val magic = ByteArray(4)
                 if (input.read(magic) != 4) return false
-                // GGUF magic: "GGUF" = 0x46475547
                 magic[0] == 'G'.code.toByte() &&
                     magic[1] == 'G'.code.toByte() &&
                     magic[2] == 'U'.code.toByte() &&

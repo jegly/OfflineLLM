@@ -29,6 +29,10 @@ data class SettingsUiState(
     val temperature: Float = 0.7f,
     val maxTokens: Int = 512,
     val contextSize: Int = 4096,
+    val topP: Float = 0.9f,
+    val topK: Int = 40,
+    val minP: Float = 0.1f,
+    val repeatPenalty: Float = 1.1f,
     val biometricLock: Boolean = false,
     val systemPromptKey: String = "default",
     val themeMode: String = "SYSTEM",
@@ -67,6 +71,10 @@ class SettingsViewModel @Inject constructor(
             temperature = settingsRepository.temperature,
             maxTokens = settingsRepository.maxTokens,
             contextSize = settingsRepository.contextSize,
+            topP = settingsRepository.topP,
+            topK = settingsRepository.topK,
+            minP = settingsRepository.minP,
+            repeatPenalty = settingsRepository.repeatPenalty,
             biometricLock = settingsRepository.biometricLock,
             systemPromptKey = settingsRepository.systemPromptKey,
             themeMode = settingsRepository.themeMode,
@@ -88,6 +96,26 @@ class SettingsViewModel @Inject constructor(
     fun setContextSize(value: Int) {
         settingsRepository.contextSize = value
         _uiState.update { it.copy(contextSize = value) }
+    }
+
+    fun setTopP(value: Float) {
+        settingsRepository.topP = value
+        _uiState.update { it.copy(topP = value) }
+    }
+
+    fun setTopK(value: Int) {
+        settingsRepository.topK = value
+        _uiState.update { it.copy(topK = value) }
+    }
+
+    fun setMinP(value: Float) {
+        settingsRepository.minP = value
+        _uiState.update { it.copy(minP = value) }
+    }
+
+    fun setRepeatPenalty(value: Float) {
+        settingsRepository.repeatPenalty = value
+        _uiState.update { it.copy(repeatPenalty = value) }
     }
 
     fun setBiometricLock(enabled: Boolean) {
@@ -147,13 +175,8 @@ class SettingsViewModel @Inject constructor(
     fun exportChats(uri: Uri) {
         viewModelScope.launch {
             try {
-                val convList = mutableListOf<ExportedChat>()
-                // Get conversations from current UI state
-                for (conv in _uiState.value.models) {
-                    // This is a workaround - ideally we'd have conversations in settings state
-                }
                 val json = Json { prettyPrint = true }
-                val exportData = ExportData(chats = convList)
+                val exportData = ExportData(chats = emptyList())
                 val jsonString = json.encodeToString(exportData)
                 FileUtils.writeTextToUri(application, uri, jsonString)
                 Toast.makeText(application, "Chats exported", Toast.LENGTH_SHORT).show()

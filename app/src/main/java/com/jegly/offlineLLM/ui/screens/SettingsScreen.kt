@@ -2,7 +2,11 @@ package com.jegly.offlineLLM.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,12 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -46,25 +54,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jegly.offlineLLM.ai.SystemPrompts
@@ -81,25 +82,19 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val context = LocalContext.current
+
     val importModelLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.importModel(it) }
-    }
+    ) { uri -> uri?.let { viewModel.importModel(it) } }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        uri?.let { viewModel.exportChats(it) }
-    }
+    ) { uri -> uri?.let { viewModel.exportChats(it) } }
 
     val importChatsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.importChats(it) }
-    }
+    ) { uri -> uri?.let { viewModel.importChats(it) } }
 
     var showClearDialog by remember { mutableStateOf(false) }
     var clearConfirmText by remember { mutableStateOf("") }
@@ -124,9 +119,8 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // === THEME SECTION ===
+            // === THEME ===
             SectionHeader("Appearance")
-
             ThemeMode.entries.forEach { mode ->
                 Card(
                     modifier = Modifier
@@ -139,57 +133,34 @@ fun SettingsScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = if (uiState.themeMode == mode.name)
                             MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant,
+                        else MaterialTheme.colorScheme.surfaceVariant,
                     ),
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        RadioButton(
-                            selected = uiState.themeMode == mode.name,
-                            onClick = null,
-                        )
-                        Text(
-                            text = mode.label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 12.dp),
-                        )
+                        RadioButton(selected = uiState.themeMode == mode.name, onClick = null)
+                        Text(mode.label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
                     }
                 }
             }
 
-            // === ACCENT COLOUR SECTION ===
+            // === ACCENT COLOUR ===
             SectionHeader("Accent Colour")
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 accentColors.forEach { accent ->
                     Box(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
                             .background(accent.seed)
-                            .then(
-                                if (uiState.accentColor == accent.key)
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                else Modifier
-                            )
+                            .then(if (uiState.accentColor == accent.key) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape) else Modifier)
                             .clickable { viewModel.setAccentColor(accent.key) },
                         contentAlignment = Alignment.Center,
                     ) {
                         if (uiState.accentColor == accent.key) {
-                            Icon(
-                                Icons.Filled.Check,
-                                contentDescription = "Selected",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp),
-                            )
+                            Icon(Icons.Filled.Check, contentDescription = "Selected", tint = Color.White, modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -197,9 +168,8 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
-            // === MODEL SECTION ===
+            // === MODEL ===
             SectionHeader("Model")
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -207,46 +177,27 @@ fun SettingsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     if (uiState.activeModel != null) {
                         Text("Active: ${uiState.activeModel!!.name}", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "Size: ${FileUtils.formatFileSize(uiState.activeModel!!.sizeBytes)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Text("Size: ${FileUtils.formatFileSize(uiState.activeModel!!.sizeBytes)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Text("No model selected", style = MaterialTheme.typography.titleSmall)
                     }
                 }
             }
-
             uiState.models.forEach { model ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (model.id == uiState.activeModel?.id)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surface,
+                        containerColor = if (model.id == uiState.activeModel?.id) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                     ),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(model.name, style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                FileUtils.formatFileSize(model.sizeBytes),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Text("${FileUtils.formatFileSize(model.sizeBytes)} | ctx: ${model.contextSize}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Row {
                             if (model.id != uiState.activeModel?.id) {
-                                TextButton(onClick = { viewModel.selectModel(model.id) }) {
-                                    Text("Use")
-                                }
+                                TextButton(onClick = { viewModel.selectModel(model.id) }) { Text("Use") }
                             }
                             if (!model.isBundled) {
                                 IconButton(onClick = { viewModel.deleteModel(model.id) }) {
@@ -257,109 +208,104 @@ fun SettingsScreen(
                     }
                 }
             }
-
-            Button(
-                onClick = { importModelLauncher.launch(arrayOf("*/*")) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Button(onClick = { importModelLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.FileOpen, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Import GGUF Model")
             }
 
             HorizontalDivider()
 
-            // === GENERATION SECTION ===
-            SectionHeader("Generation")
+            // === SAMPLING PARAMETERS ===
+            SectionHeader("Sampling Parameters")
 
+            // Temperature
             var tempValue by remember { mutableFloatStateOf(uiState.temperature) }
-            Text("Temperature: ${String.format("%.2f", tempValue)}")
-            Slider(
+            ParamSlider(
+                label = "Temperature: ${String.format("%.2f", tempValue)}",
+                description = "Controls randomness. Lower = more focused and deterministic. Higher = more creative and varied.",
                 value = tempValue,
                 onValueChange = { tempValue = it },
                 onValueChangeFinished = { viewModel.setTemperature(tempValue) },
-                valueRange = 0.1f..1.0f,
-                steps = 17,
+                valueRange = 0.1f..2.0f,
+                steps = 38,
             )
 
-            Text("Max Tokens: ${uiState.maxTokens}")
+            // Top-P (nucleus sampling)
+            var topPValue by remember { mutableFloatStateOf(uiState.topP) }
+            ParamSlider(
+                label = "Top-P: ${String.format("%.2f", topPValue)}",
+                description = "Nucleus sampling. Only considers tokens whose cumulative probability exceeds this threshold. Lower = more focused.",
+                value = topPValue,
+                onValueChange = { topPValue = it },
+                onValueChangeFinished = { viewModel.setTopP(topPValue) },
+                valueRange = 0.1f..1.0f,
+                steps = 18,
+            )
+
+            // Top-K
+            var topKValue by remember { mutableIntStateOf(uiState.topK) }
+            ParamSlider(
+                label = "Top-K: $topKValue",
+                description = "Limits token selection to the K most likely next tokens. Lower = more focused. 0 = disabled.",
+                value = topKValue.toFloat(),
+                onValueChange = { topKValue = it.toInt() },
+                onValueChangeFinished = { viewModel.setTopK(topKValue) },
+                valueRange = 0f..100f,
+                steps = 20,
+            )
+
+            // Min-P
+            var minPValue by remember { mutableFloatStateOf(uiState.minP) }
+            ParamSlider(
+                label = "Min-P: ${String.format("%.2f", minPValue)}",
+                description = "Filters out tokens with probability below this fraction of the top token. Adaptive alternative to Top-K.",
+                value = minPValue,
+                onValueChange = { minPValue = it },
+                onValueChangeFinished = { viewModel.setMinP(minPValue) },
+                valueRange = 0.0f..0.5f,
+                steps = 10,
+            )
+
+            // Repeat Penalty
+            var repeatValue by remember { mutableFloatStateOf(uiState.repeatPenalty) }
+            ParamSlider(
+                label = "Repeat Penalty: ${String.format("%.2f", repeatValue)}",
+                description = "Penalises repeating tokens. 1.0 = no penalty. Higher values reduce repetition in output.",
+                value = repeatValue,
+                onValueChange = { repeatValue = it },
+                onValueChangeFinished = { viewModel.setRepeatPenalty(repeatValue) },
+                valueRange = 1.0f..2.0f,
+                steps = 20,
+            )
+
+            // Max tokens
+            Text("Max Tokens: ${uiState.maxTokens}", style = MaterialTheme.typography.bodyMedium)
+            Text("Maximum number of tokens the model will generate per response.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(256, 512, 1024, 2048).forEach { value ->
                     Button(
                         onClick = { viewModel.setMaxTokens(value) },
-                        colors = if (uiState.maxTokens == value) ButtonDefaults.buttonColors()
-                        else ButtonDefaults.outlinedButtonColors(),
+                        colors = if (uiState.maxTokens == value) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
                         modifier = Modifier.weight(1f),
-                    ) {
-                        Text("$value")
-                    }
+                    ) { Text("$value") }
                 }
             }
 
-            Text("Context Size: ${uiState.contextSize}")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(2048, 4096, 8192).forEach { value ->
-                    Button(
-                        onClick = { viewModel.setContextSize(value) },
-                        colors = if (uiState.contextSize == value) ButtonDefaults.buttonColors()
-                        else ButtonDefaults.outlinedButtonColors(),
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text("$value")
-                    }
-                }
-            }
+            // Context size slider
+            var ctxValue by remember { mutableFloatStateOf(uiState.contextSize.toFloat()) }
+            ParamSlider(
+                label = "Context Size: ${ctxValue.toInt()}",
+                description = "How many tokens of conversation history the model can see. Larger = more memory of past messages but uses more RAM.",
+                value = ctxValue,
+                onValueChange = { ctxValue = it },
+                onValueChangeFinished = { viewModel.setContextSize(ctxValue.toInt()) },
+                valueRange = 512f..16384f,
+                steps = 31,
+            )
 
             HorizontalDivider()
 
-            // === SYSTEM PROMPT SECTION ===
-            SectionHeader("System Prompt")
-
-            var promptExpanded by remember { mutableStateOf(false) }
-            var customPrompt by rememberSaveable { mutableStateOf("") }
-
-            ExposedDropdownMenuBox(
-                expanded = promptExpanded,
-                onExpandedChange = { promptExpanded = it },
-            ) {
-                OutlinedTextField(
-                    value = SystemPrompts.getLabel(uiState.systemPromptKey),
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = promptExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                )
-                ExposedDropdownMenu(
-                    expanded = promptExpanded,
-                    onDismissRequest = { promptExpanded = false },
-                ) {
-                    SystemPrompts.options.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.label) },
-                            onClick = {
-                                viewModel.setSystemPrompt(option.key)
-                                promptExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            if (uiState.systemPromptKey == "custom") {
-                OutlinedTextField(
-                    value = customPrompt,
-                    onValueChange = { customPrompt = it },
-                    label = { Text("Custom System Prompt") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 6,
-                )
-            }
-
-            HorizontalDivider()
-
-            // === GENERATION BEHAVIOUR ===
+            // === THINKING TOGGLE ===
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -367,61 +313,60 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Strip Thinking Tags")
-                    Text(
-                        "Hide <think> blocks from model output",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Text("Hide <think> blocks from model output", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Switch(
-                    checked = uiState.disableThinking,
-                    onCheckedChange = { viewModel.setDisableThinking(it) },
-                )
+                Switch(checked = uiState.disableThinking, onCheckedChange = { viewModel.setDisableThinking(it) })
             }
 
             HorizontalDivider()
 
-            // === SECURITY SECTION ===
+            // === SYSTEM PROMPT ===
+            SectionHeader("System Prompt")
+            var promptExpanded by remember { mutableStateOf(false) }
+            var customPrompt by rememberSaveable { mutableStateOf("") }
+            ExposedDropdownMenuBox(expanded = promptExpanded, onExpandedChange = { promptExpanded = it }) {
+                OutlinedTextField(
+                    value = SystemPrompts.getLabel(uiState.systemPromptKey),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = promptExpanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                )
+                ExposedDropdownMenu(expanded = promptExpanded, onDismissRequest = { promptExpanded = false }) {
+                    SystemPrompts.options.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option.label) },
+                            onClick = { viewModel.setSystemPrompt(option.key); promptExpanded = false }
+                        )
+                    }
+                }
+            }
+            if (uiState.systemPromptKey == "custom") {
+                OutlinedTextField(value = customPrompt, onValueChange = { customPrompt = it }, label = { Text("Custom System Prompt") }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 6)
+            }
+
+            HorizontalDivider()
+
+            // === SECURITY ===
             SectionHeader("Security")
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text("Biometric Lock")
-                Switch(
-                    checked = uiState.biometricLock,
-                    onCheckedChange = { viewModel.setBiometricLock(it) },
-                )
+                Switch(checked = uiState.biometricLock, onCheckedChange = { viewModel.setBiometricLock(it) })
             }
 
             HorizontalDivider()
 
-            // === DATA SECTION ===
+            // === DATA ===
             SectionHeader("Data Management")
-
-            Button(
-                onClick = { exportLauncher.launch("offlinellm_export.json") },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Button(onClick = { exportLauncher.launch("offlinellm_export.json") }, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Upload, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Export Chats as JSON")
             }
-
-            Button(
-                onClick = { importChatsLauncher.launch(arrayOf("application/json")) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Button(onClick = { importChatsLauncher.launch(arrayOf("application/json")) }, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Import Chats from JSON")
             }
-
-            Button(
-                onClick = { showClearDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            ) {
+            Button(onClick = { showClearDialog = true }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
                 Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Clear All Chats")
             }
@@ -429,20 +374,11 @@ fun SettingsScreen(
             HorizontalDivider()
 
             // === ABOUT & HELP ===
-            Button(
-                onClick = onNavigateToHelp,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(),
-            ) {
-                Icon(Icons.Filled.HelpOutline, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+            Button(onClick = onNavigateToHelp, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.outlinedButtonColors()) {
+                Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Help & Model Guide")
             }
-
-            Button(
-                onClick = onNavigateToAbout,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(),
-            ) {
+            Button(onClick = onNavigateToAbout, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.outlinedButtonColors()) {
                 Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("About OfflineLLM")
             }
@@ -457,16 +393,9 @@ fun SettingsScreen(
             onDismissRequest = {},
             title = { Text("Importing Model") },
             text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                    Text(
-                        "Copying and validating model file\u2026\nThis may take a moment for large models.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Text("Copying and validating model file\u2026\nThis may take a moment for large models.", style = MaterialTheme.typography.bodyMedium)
                 }
             },
             confirmButton = {},
@@ -476,43 +405,23 @@ fun SettingsScreen(
     // Clear all dialog
     if (showClearDialog) {
         AlertDialog(
-            onDismissRequest = {
-                showClearDialog = false
-                clearConfirmText = ""
-            },
+            onDismissRequest = { showClearDialog = false; clearConfirmText = "" },
             title = { Text("Clear All Chats") },
             text = {
                 Column {
                     Text("This will permanently delete all conversations and messages. This cannot be undone.")
                     Spacer(modifier = Modifier.height(12.dp))
                     Text("Type DELETE to confirm:")
-                    OutlinedTextField(
-                        value = clearConfirmText,
-                        onValueChange = { clearConfirmText = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
+                    OutlinedTextField(value = clearConfirmText, onValueChange = { clearConfirmText = it }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.clearAllChats()
-                        showClearDialog = false
-                        clearConfirmText = ""
-                    },
-                    enabled = clearConfirmText == "DELETE",
-                ) {
+                TextButton(onClick = { viewModel.clearAllChats(); showClearDialog = false; clearConfirmText = "" }, enabled = clearConfirmText == "DELETE") {
                     Text("Confirm", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showClearDialog = false
-                    clearConfirmText = ""
-                }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { showClearDialog = false; clearConfirmText = "" }) { Text("Cancel") }
             }
         )
     }
@@ -520,9 +429,28 @@ fun SettingsScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-    )
+    Text(text = title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+}
+
+@Composable
+private fun ParamSlider(
+    label: String,
+    description: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+) {
+    Column {
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            onValueChangeFinished = onValueChangeFinished,
+            valueRange = valueRange,
+            steps = steps,
+        )
+    }
 }
