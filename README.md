@@ -2,7 +2,7 @@
 
 <img src="Screenshots/offlinellm-banner.png" width="600" />
 
-**A fully offline, private AI chat app for Android**
+**The first of its kind,A fully offline, private AI chat app for Android**
 
 The only Android LLM app that literally cannot phone home.
 All LLM inference runs entirely on-device via llama.cpp.
