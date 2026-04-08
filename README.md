@@ -50,8 +50,7 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 - **Security** — Encrypted settings, optional biometric lock, secure file deletion
 - **Chat Backup** — Export/import all conversations as JSON
 - **Built-in Help** — Guide for downloading models from HuggingFace
-- **Gemma4** - Currently work in progress for it to work
-
+- **Gemma4** - Now supported in Version 3
 ## Recommended Models
 
 | Model | Size | Best For |
