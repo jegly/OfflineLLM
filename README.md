@@ -73,7 +73,7 @@ Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Cho
 
 Or via ADB:
 ```bash
-adb install OfflineLLM-v2.0.0-release.apk
+adb install OfflineLLM.apk
 ```
 
 ---
