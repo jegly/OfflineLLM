@@ -16,3 +16,4 @@ app/src/main/assets/model/*.gguf
 .externalNativeBuild
 .cxx
 captures
+app/release/

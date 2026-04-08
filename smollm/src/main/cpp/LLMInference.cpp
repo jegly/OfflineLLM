@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 
 #define TAG "[offlineLLM-Cpp]"
 #define LOGi(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -51,49 +52,59 @@ LLMInference::loadModel(const char *model_path, float minP, float temperature, f
         throw std::runtime_error("llama_new_context_with_model() returned null");
     }
 
-    // Build sampler chain with all parameters
     llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
     sampler_params.no_perf = true;
     _sampler = llama_sampler_chain_init(sampler_params);
 
-    // Add repeat penalty if enabled
     if (repeatPenalty > 1.0f) {
         llama_sampler_chain_add(_sampler, llama_sampler_init_penalties(256, repeatPenalty, 0.0f, 0.0f));
     }
 
-    // Add top-k if enabled (0 = disabled)
     if (topK > 0) {
         llama_sampler_chain_add(_sampler, llama_sampler_init_top_k(topK));
     }
 
-    // Add top-p if enabled
     if (topP < 1.0f) {
         llama_sampler_chain_add(_sampler, llama_sampler_init_top_p(topP, 1));
     }
 
-    // Add min-p if enabled
     if (minP > 0.0f) {
         llama_sampler_chain_add(_sampler, llama_sampler_init_min_p(minP, 1));
     }
 
-    // Temperature and distribution
     llama_sampler_chain_add(_sampler, llama_sampler_init_temp(temperature));
     llama_sampler_chain_add(_sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
     _formattedMessages = std::vector<char>(llama_n_ctx(_ctx));
     _messages.clear();
 
-    if (chatTemplate == nullptr) {
+    if (chatTemplate == nullptr || strlen(chatTemplate) == 0) {
         _chatTemplate = llama_model_chat_template(_model, nullptr);
     } else {
         _chatTemplate = strdup(chatTemplate);
     }
+    
+    if (_chatTemplate != nullptr) {
+        std::string tmpl(_chatTemplate);
+        if (tmpl.find("gemma") != std::string::npos || 
+            tmpl.find("<start_of_turn>") != std::string::npos ||
+            tmpl.find("<turn|") != std::string::npos) {
+            _assistantRole = "model";
+        } else {
+            _assistantRole = "assistant";
+        }
+    }
+
     this->_storeChats = storeChats;
 }
 
 void
 LLMInference::addChatMessage(const char *message, const char *role) {
-    _messages.push_back({strdup(role), strdup(message)});
+    const char* actualRole = role;
+    if (strcmp(role, "assistant") == 0) {
+        actualRole = _assistantRole.c_str();
+    }
+    _messages.push_back({strdup(actualRole), strdup(message)});
 }
 
 float
@@ -115,19 +126,16 @@ LLMInference::startCompletion(const char *query) {
     }
     _responseGenerationTime = 0;
     _responseNumTokens = 0;
-    addChatMessage(query, "user");
+    _response.clear();
+    _cacheResponseTokens.clear();
+    
+    std::string queryString(query);
+    if (queryString.find("<turn|") != std::string::npos || queryString.find("<start_of_turn>") != std::string::npos) {
+         _promptTokens = common_tokenize(llama_model_get_vocab(_model), queryString, true, true);
+    } else {
+        addChatMessage(query, "user");
 
-    int new_len = llama_chat_apply_template(
-        _chatTemplate,
-        _messages.data(),
-        _messages.size(),
-        true,
-        _formattedMessages.data(),
-        _formattedMessages.size()
-    );
-    if (new_len > (int)_formattedMessages.size()) {
-        _formattedMessages.resize(new_len);
-        new_len = llama_chat_apply_template(
+        int new_len = llama_chat_apply_template(
             _chatTemplate,
             _messages.data(),
             _messages.size(),
@@ -135,12 +143,32 @@ LLMInference::startCompletion(const char *query) {
             _formattedMessages.data(),
             _formattedMessages.size()
         );
+        if (new_len > (int)_formattedMessages.size()) {
+            _formattedMessages.resize(new_len);
+            new_len = llama_chat_apply_template(
+                _chatTemplate,
+                _messages.data(),
+                _messages.size(),
+                true,
+                _formattedMessages.data(),
+                _formattedMessages.size()
+            );
+        }
+        
+        if (new_len < 0) {
+            LOGe("llama_chat_apply_template() failed, using fallback formatting");
+            std::stringstream fallback;
+            for (auto &msg : _messages) {
+                fallback << msg.role << ": " << msg.content << "\n";
+            }
+            fallback << _assistantRole << ":";
+            std::string prompt = fallback.str();
+            _promptTokens = common_tokenize(llama_model_get_vocab(_model), prompt, true, true);
+        } else {
+            std::string prompt(_formattedMessages.begin(), _formattedMessages.begin() + new_len);
+            _promptTokens = common_tokenize(llama_model_get_vocab(_model), prompt, true, true);
+        }
     }
-    if (new_len < 0) {
-        throw std::runtime_error("llama_chat_apply_template() failed");
-    }
-    std::string prompt(_formattedMessages.begin(), _formattedMessages.begin() + new_len);
-    _promptTokens = common_tokenize(llama_model_get_vocab(_model), prompt, true, true);
 
     _batch = new llama_batch();
     _batch->token = _promptTokens.data();
@@ -191,12 +219,31 @@ LLMInference::completionLoop() {
     }
 
     _currToken = llama_sampler_sample(_sampler, _ctx, -1);
-    if (llama_vocab_is_eog(llama_model_get_vocab(_model), _currToken)) {
+    
+    // Check if token is EOG or if the text so far contains stop markers
+    bool is_eog = llama_vocab_is_eog(llama_model_get_vocab(_model), _currToken);
+    
+    std::string piece = common_token_to_piece(_ctx, _currToken, true);
+    
+    // Check for stop sequences in the cumulative response
+    static const std::vector<std::string> stop_sequences = {
+        "<turn|", "<|turn_end|>", "<turn_end|>", "<start_of_turn>", "<end_of_turn>", "###", "System instruction:"
+    };
+
+    std::string current_full = _response + _cacheResponseTokens + piece;
+    for (const auto& stop : stop_sequences) {
+        if (current_full.find(stop) != std::string::npos) {
+            is_eog = true;
+            break;
+        }
+    }
+
+    if (is_eog) {
         addChatMessage(strdup(_response.data()), "assistant");
         _response.clear();
         return "[EOG]";
     }
-    std::string piece = common_token_to_piece(_ctx, _currToken, true);
+
     auto end = ggml_time_us();
     _responseGenerationTime += (end - start);
     _responseNumTokens += 1;
@@ -217,10 +264,11 @@ LLMInference::completionLoop() {
 
 void
 LLMInference::stopCompletion() {
-    if (_storeChats) {
+    if (_storeChats && !_response.empty()) {
         addChatMessage(_response.c_str(), "assistant");
     }
     _response.clear();
+    _cacheResponseTokens.clear();
 }
 
 LLMInference::~LLMInference() {

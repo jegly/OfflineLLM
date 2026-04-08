@@ -165,8 +165,21 @@ class ChatViewModel @Inject constructor(
                 )
             }
 
+            val activeModelId = settingsRepository.activeModelId
+            val model = chatRepository.getModel(activeModelId)
+            
+            val query = if (model != null && PromptFormatter.isGemma4(model.name, model.chatTemplate)) {
+                // Manually format for Gemma 4 if detected
+                val systemPrompt = SystemPrompts.getPrompt(settingsRepository.systemPromptKey)
+                val historyMessages = chatRepository.getMessagesSync(conversation.id).dropLast(1)
+                val history = historyMessages.map { it.role to it.content }
+                PromptFormatter.formatGemma4Prompt(systemPrompt, history, sanitized)
+            } else {
+                sanitized
+            }
+
             inferenceEngine.generateResponse(
-                query = sanitized,
+                query = query,
                 onToken = { partial ->
                     _uiState.update { it.copy(partialResponse = partial) }
                 },

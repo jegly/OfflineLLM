@@ -109,19 +109,25 @@ class SmolLM {
             )
         }
 
-    fun addUserMessage(message: String) {
+    /**
+     * Generic method to add a message with a specific role.
+     * Essential for models like Gemma that use "model" instead of "assistant".
+     */
+    fun addChatMessage(role: String, message: String) {
         verifyHandle()
-        addChatMessage(nativePtr, message, "user")
+        addChatMessage(nativePtr, message, role)
+    }
+
+    fun addUserMessage(message: String) {
+        addChatMessage("user", message)
     }
 
     fun addSystemPrompt(prompt: String) {
-        verifyHandle()
-        addChatMessage(nativePtr, prompt, "system")
+        addChatMessage("system", prompt)
     }
 
     fun addAssistantMessage(message: String) {
-        verifyHandle()
-        addChatMessage(nativePtr, message, "assistant")
+        addChatMessage("assistant", message)
     }
 
     fun getResponseGenerationSpeed(): Float {

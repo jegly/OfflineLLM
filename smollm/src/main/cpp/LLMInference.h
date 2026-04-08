@@ -35,6 +35,7 @@ private:
     std::string _cacheResponseTokens;
     const char *_chatTemplate = nullptr;
     bool _storeChats = true;
+    std::string _assistantRole = "assistant";
 
     int64_t _responseGenerationTime = 0;
     int _responseNumTokens = 0;

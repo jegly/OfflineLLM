@@ -48,7 +48,7 @@ fun InputBar(
                 .weight(1f)
                 .padding(end = 8.dp),
             placeholder = { Text("Type a message\u2026") },
-            enabled = enabled && !isGenerating,
+            enabled = enabled,
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),

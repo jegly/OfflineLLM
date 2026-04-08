@@ -57,10 +57,7 @@ class InferenceEngine {
                     }
 
                     for ((role, content) in conversationHistory) {
-                        when (role) {
-                            "user" -> instance.addUserMessage(content)
-                            "assistant" -> instance.addAssistantMessage(content)
-                        }
+                        instance.addChatMessage(role, content)
                     }
 
                     withContext(Dispatchers.Main) {
@@ -108,38 +105,38 @@ class InferenceEngine {
             generationJob = CoroutineScope(Dispatchers.Default).launch {
                 try {
                     isGenerating = true
-                    var response = ""
+                    var fullResponse = ""
+                    var stopRequested = false
 
                     val duration = measureTime {
+                        // Use collect but check for stop sequences to break manually
                         instance.getResponseAsFlow(query).collect { piece ->
-                            response += piece
-                            // Strip think tags from streaming display
-                            val cleanPartial = response
-                                .replace(Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL), "")
-                                .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "")
-                                .trim()
-                            withContext(Dispatchers.Main) {
-                                onToken(cleanPartial)
+                            if (stopRequested) return@collect
+                            
+                            fullResponse += piece
+                            
+                            // Check if we hit a stop sequence
+                            if (containsStopSequence(fullResponse)) {
+                                stopRequested = true
+                                // We don't cancel the job, we just stop collecting pieces
+                                return@collect
+                            }
+
+                            // Emission logic: don't emit if we're currently typing a potential tag
+                            val displayResponse = cleanModelOutput(fullResponse, isFinal = false)
+                            if (displayResponse.isNotBlank() || fullResponse.isEmpty()) {
+                                withContext(Dispatchers.Main) {
+                                    onToken(displayResponse)
+                                }
                             }
                         }
                     }
 
-                    // Strip think tags from final response
-                    val cleanResponse = response
-                        .replace(Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL), "")
-                        .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "")
-                        .trim()
-
-                    // Fix empty response: if model returned nothing useful, provide fallback
-                    val finalResponse = if (cleanResponse.isBlank()) {
-                        if (response.isNotBlank()) {
-                            // Had content but it was all thinking tags
-                            "(The model only produced internal reasoning with no visible response. Try rephrasing your question.)"
-                        } else {
-                            "(Empty response from model. The model may need a different prompt or temperature setting.)"
-                        }
-                    } else {
-                        cleanResponse
+                    // Final cleanup
+                    val finalResponse = cleanModelOutput(fullResponse, isFinal = true).let {
+                        if (it.isBlank()) {
+                            if (fullResponse.isNotBlank()) "(No visible content produced)" else "(Empty response)"
+                        } else it
                     }
 
                     withContext(Dispatchers.Main) {
@@ -162,6 +159,38 @@ class InferenceEngine {
                 }
             }
         }
+    }
+
+    private fun containsStopSequence(text: String): Boolean {
+        val stops = listOf("<turn|", "<|turn_end|>", "<turn_end|>", "<start_of_turn>", "<end_of_turn>")
+        return stops.any { text.contains(it, ignoreCase = true) }
+    }
+
+    private fun cleanModelOutput(raw: String, isFinal: Boolean): String {
+        var cleaned = raw
+            .replace(Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("<think>.*", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("<turn\\|.*?\\|>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<\\|turn_end\\|>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<turn_end\\|>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<start_of_turn>.*?\\n", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<end_of_turn>", RegexOption.IGNORE_CASE), "")
+            .replace("System instruction:", "")
+
+        if (!isFinal) {
+            // Buffer to prevent tag fragments from flickering
+            val potentialTagStart = listOf("<turn", "<|turn", "<|", "<start", "<")
+            for (p in potentialTagStart) {
+                if (cleaned.endsWith(p, ignoreCase = true)) {
+                    return cleaned.substring(0, cleaned.length - p.length).trim()
+                }
+            }
+        } else {
+            // Final pass to remove any trailing tag fragments
+            cleaned = cleaned.replace(Regex("<.*$", RegexOption.IGNORE_CASE), "")
+        }
+
+        return cleaned.trim()
     }
 
     fun stopGeneration() {
