@@ -2,8 +2,9 @@ package com.jegly.offlineLLM.data.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,12 +13,15 @@ import javax.inject.Singleton
 class SettingsRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    // Prefer a StrongBox-backed master key when available. Fall back gracefully when not.
+    private val masterKeyAndBackend: Pair<MasterKey, String> by lazy { createMasterKeyAndBackend() }
+    val secureStorageBackend: String
+        get() = masterKeyAndBackend.second
 
     private val prefs: SharedPreferences by lazy {
         EncryptedSharedPreferences.create(
             "offlinellm_secure_prefs",
-            masterKeyAlias,
+            MASTER_KEY_ALIAS,
             context,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -25,6 +29,8 @@ class SettingsRepository @Inject constructor(
     }
 
     companion object {
+        private const val MASTER_KEY_ALIAS = "offlinellm_secure_prefs_master_key"
+
         const val KEY_TEMPERATURE = "temperature"
         const val KEY_MAX_TOKENS = "max_tokens"
         const val KEY_CONTEXT_SIZE = "context_size"
@@ -33,6 +39,10 @@ class SettingsRepository @Inject constructor(
         const val KEY_MIN_P = "min_p"
         const val KEY_REPEAT_PENALTY = "repeat_penalty"
         const val KEY_BIOMETRIC_LOCK = "biometric_lock"
+        const val KEY_SCREENSHOT_PROTECTION = "screenshot_protection"
+        const val KEY_TAPJACKING_PROTECTION = "tapjacking_protection"
+        const val KEY_SENSITIVE_DATA_ACCESSIBILITY = "sensitive_data_accessibility"
+        const val KEY_AUTO_LOCK_ON_BACKGROUND = "auto_lock_on_background"
         const val KEY_ACTIVE_MODEL_ID = "active_model_id"
         const val KEY_SYSTEM_PROMPT_KEY = "system_prompt_key"
         const val KEY_CUSTOM_SYSTEM_PROMPT = "custom_system_prompt"
@@ -50,6 +60,45 @@ class SettingsRepository @Inject constructor(
         const val DEFAULT_MIN_P = 0.1f
         const val DEFAULT_REPEAT_PENALTY = 1.1f
         const val DEFAULT_NUM_THREADS = 4
+
+        const val DEFAULT_SCREENSHOT_PROTECTION = true
+        const val DEFAULT_TAPJACKING_PROTECTION = true
+        const val DEFAULT_SENSITIVE_DATA_ACCESSIBILITY = true
+        const val DEFAULT_AUTO_LOCK_ON_BACKGROUND = false
+    }
+
+    private fun createMasterKeyAndBackend(): Pair<MasterKey, String> {
+        val strongBoxAvailable = try {
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
+        } catch (_: Exception) {
+            false
+        }
+
+        return try {
+            val requestedKey = MasterKey.Builder(context, MASTER_KEY_ALIAS)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .setRequestStrongBoxBacked(true)
+                .build()
+
+            // Jetpack Security doesn't consistently expose StrongBox state across versions.
+            // Use best-effort reflection; fall back to feature detection.
+            val reflectStrongBox = runCatching {
+                val m = requestedKey.javaClass.getMethod("isStrongBoxBacked")
+                (m.invoke(requestedKey) as? Boolean) ?: false
+            }.getOrDefault(false)
+
+            val backend = when {
+                reflectStrongBox -> "StrongBox"
+                strongBoxAvailable -> "TEE" // StrongBox available, but the key may have fallen back.
+                else -> "TEE"
+            }
+            requestedKey to backend
+        } catch (_: Exception) {
+            val fallbackKey = MasterKey.Builder(context, MASTER_KEY_ALIAS)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            fallbackKey to "TEE"
+        }
     }
 
     var temperature: Float
@@ -83,6 +132,22 @@ class SettingsRepository @Inject constructor(
     var biometricLock: Boolean
         get() = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
         set(value) = prefs.edit().putBoolean(KEY_BIOMETRIC_LOCK, value).apply()
+
+    var screenshotProtectionEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SCREENSHOT_PROTECTION, DEFAULT_SCREENSHOT_PROTECTION)
+        set(value) = prefs.edit().putBoolean(KEY_SCREENSHOT_PROTECTION, value).apply()
+
+    var tapjackingProtectionEnabled: Boolean
+        get() = prefs.getBoolean(KEY_TAPJACKING_PROTECTION, DEFAULT_TAPJACKING_PROTECTION)
+        set(value) = prefs.edit().putBoolean(KEY_TAPJACKING_PROTECTION, value).apply()
+
+    var sensitiveDataAccessibilityEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SENSITIVE_DATA_ACCESSIBILITY, DEFAULT_SENSITIVE_DATA_ACCESSIBILITY)
+        set(value) = prefs.edit().putBoolean(KEY_SENSITIVE_DATA_ACCESSIBILITY, value).apply()
+
+    var autoLockOnBackgroundEnabled: Boolean
+        get() = prefs.getBoolean(KEY_AUTO_LOCK_ON_BACKGROUND, DEFAULT_AUTO_LOCK_ON_BACKGROUND)
+        set(value) = prefs.edit().putBoolean(KEY_AUTO_LOCK_ON_BACKGROUND, value).apply()
 
     var activeModelId: Long
         get() = prefs.getLong(KEY_ACTIVE_MODEL_ID, -1L)

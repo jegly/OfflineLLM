@@ -1,5 +1,6 @@
 package com.jegly.offlineLLM.ui.screens
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +55,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,6 +70,9 @@ import com.jegly.offlineLLM.ui.components.MessageBubble
 import com.jegly.offlineLLM.ui.components.StreamingMessage
 import kotlinx.coroutines.launch
 
+private val SensitiveDataKey = SemanticsPropertyKey<Boolean>("SensitiveData")
+private var SemanticsPropertyReceiver.sensitiveData by SensitiveDataKey
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -73,6 +80,14 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sensitiveDataModifier = if (
+        uiState.sensitiveDataAccessibilityEnabled &&
+        Build.VERSION.SDK_INT >= 36 // Android 16+
+    ) {
+        Modifier.semantics { sensitiveData = true }
+    } else {
+        Modifier
+    }
     var inputText by rememberSaveable { mutableStateOf("") }
     var deleteTarget by remember { mutableStateOf<com.jegly.offlineLLM.data.local.entities.Message?>(null) }
     var showSearch by rememberSaveable { mutableStateOf(false) }
@@ -186,6 +201,7 @@ fun ChatScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .then(sensitiveDataModifier)
             ) {
                 // Search bar
                 if (showSearch) {

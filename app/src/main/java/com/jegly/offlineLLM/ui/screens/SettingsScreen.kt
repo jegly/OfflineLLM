@@ -349,12 +349,84 @@ fun SettingsScreen(
 
             // === SECURITY ===
             SectionHeader("Security")
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text("Biometric Lock")
-                Switch(checked = uiState.biometricLock, onCheckedChange = { viewModel.setBiometricLock(it) })
+                Switch(
+                    checked = uiState.biometricLock,
+                    onCheckedChange = { viewModel.setBiometricLock(it) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Auto-Lock on Background")
+                Switch(
+                    checked = uiState.biometricLock && uiState.autoLockOnBackground,
+                    enabled = uiState.biometricLock,
+                    onCheckedChange = { viewModel.setAutoLockOnBackground(it) }
+                )
             }
 
             HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Screenshot Protection")
+                Switch(
+                    checked = uiState.screenshotProtectionEnabled,
+                    onCheckedChange = { viewModel.setScreenshotProtectionEnabled(it) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Tapjacking Protection")
+                Switch(
+                    checked = uiState.tapjackingProtectionEnabled,
+                    onCheckedChange = { viewModel.setTapjackingProtectionEnabled(it) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Accessibility Data Sensitivity")
+                Switch(
+                    checked = uiState.sensitiveDataAccessibilityEnabled,
+                    onCheckedChange = { viewModel.setSensitiveDataAccessibilityEnabled(it) }
+                )
+            }
+            Text(
+                "Applies on Android 16+ to mark chat content as sensitive for accessibility.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Secure Storage Backend")
+                Text(uiState.secureStorageBackend)
+            }
 
             // === DATA ===
             SectionHeader("Data Management")

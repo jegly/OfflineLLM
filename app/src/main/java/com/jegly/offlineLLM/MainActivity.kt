@@ -1,6 +1,7 @@
 package com.jegly.offlineLLM
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
 
         authRequired = settingsRepository.biometricLock
+        applyWindowSecurityToggles()
 
         if (authRequired) {
             authenticateWithBiometric()
@@ -71,6 +73,14 @@ class MainActivity : FragmentActivity() {
                         val newAccent = settingsRepository.accentColor
                         if (newAccent != accentColorState.value) {
                             accentColorState.value = newAccent
+                        }
+
+                        // Keep security flags in sync with settings toggles.
+                        applyWindowSecurityToggles()
+
+                        authRequired = settingsRepository.biometricLock
+                        if (!authRequired) {
+                            isAuthenticated = true
                         }
                     } catch (_: Exception) {}
                 }
@@ -113,8 +123,22 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
+        authRequired = settingsRepository.biometricLock
+        applyWindowSecurityToggles()
+
         if (authRequired && !isAuthenticated) {
             authenticateWithBiometric()
+        } else if (!authRequired) {
+            isAuthenticated = true
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val shouldAutoLock =
+            settingsRepository.biometricLock && settingsRepository.autoLockOnBackgroundEnabled
+        if (shouldAutoLock) {
+            isAuthenticated = false
         }
     }
 
@@ -139,6 +163,17 @@ class MainActivity : FragmentActivity() {
             else -> {
                 isAuthenticated = true
             }
+        }
+    }
+
+    private fun applyWindowSecurityToggles() {
+        if (settingsRepository.screenshotProtectionEnabled) {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+            )
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
     }
 }

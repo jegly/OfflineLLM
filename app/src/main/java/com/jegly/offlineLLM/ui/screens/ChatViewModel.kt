@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -41,6 +42,7 @@ data class ChatUiState(
     val showConversationDrawer: Boolean = false,
     val errorMessage: String? = null,
     val speakingMessageId: String? = null,
+    val sensitiveDataAccessibilityEnabled: Boolean = false,
 )
 
 @HiltViewModel
@@ -64,6 +66,18 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             memoryMonitor.memoryStatus.collect { status ->
                 _uiState.update { it.copy(memoryStatus = status) }
+            }
+        }
+
+        // Poll settings so the accessibility marking can toggle without restarting the Activity.
+        viewModelScope.launch {
+            while (true) {
+                _uiState.update {
+                    it.copy(
+                        sensitiveDataAccessibilityEnabled = settingsRepository.sensitiveDataAccessibilityEnabled
+                    )
+                }
+                delay(500)
             }
         }
     }

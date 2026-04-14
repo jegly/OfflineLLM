@@ -34,6 +34,11 @@ data class SettingsUiState(
     val minP: Float = 0.1f,
     val repeatPenalty: Float = 1.1f,
     val biometricLock: Boolean = false,
+    val autoLockOnBackground: Boolean = false,
+    val screenshotProtectionEnabled: Boolean = true,
+    val tapjackingProtectionEnabled: Boolean = true,
+    val sensitiveDataAccessibilityEnabled: Boolean = true,
+    val secureStorageBackend: String = "Unknown",
     val systemPromptKey: String = "default",
     val themeMode: String = "SYSTEM",
     val accentColor: String = "dynamic",
@@ -76,6 +81,11 @@ class SettingsViewModel @Inject constructor(
             minP = settingsRepository.minP,
             repeatPenalty = settingsRepository.repeatPenalty,
             biometricLock = settingsRepository.biometricLock,
+            autoLockOnBackground = settingsRepository.autoLockOnBackgroundEnabled,
+            screenshotProtectionEnabled = settingsRepository.screenshotProtectionEnabled,
+            tapjackingProtectionEnabled = settingsRepository.tapjackingProtectionEnabled,
+            sensitiveDataAccessibilityEnabled = settingsRepository.sensitiveDataAccessibilityEnabled,
+            secureStorageBackend = settingsRepository.secureStorageBackend,
             systemPromptKey = settingsRepository.systemPromptKey,
             themeMode = settingsRepository.themeMode,
             accentColor = settingsRepository.accentColor,
@@ -121,6 +131,26 @@ class SettingsViewModel @Inject constructor(
     fun setBiometricLock(enabled: Boolean) {
         settingsRepository.biometricLock = enabled
         _uiState.update { it.copy(biometricLock = enabled) }
+    }
+
+    fun setAutoLockOnBackground(enabled: Boolean) {
+        settingsRepository.autoLockOnBackgroundEnabled = enabled
+        _uiState.update { it.copy(autoLockOnBackground = enabled) }
+    }
+
+    fun setScreenshotProtectionEnabled(enabled: Boolean) {
+        settingsRepository.screenshotProtectionEnabled = enabled
+        _uiState.update { it.copy(screenshotProtectionEnabled = enabled) }
+    }
+
+    fun setTapjackingProtectionEnabled(enabled: Boolean) {
+        settingsRepository.tapjackingProtectionEnabled = enabled
+        _uiState.update { it.copy(tapjackingProtectionEnabled = enabled) }
+    }
+
+    fun setSensitiveDataAccessibilityEnabled(enabled: Boolean) {
+        settingsRepository.sensitiveDataAccessibilityEnabled = enabled
+        _uiState.update { it.copy(sensitiveDataAccessibilityEnabled = enabled) }
     }
 
     fun setSystemPrompt(key: String) {
