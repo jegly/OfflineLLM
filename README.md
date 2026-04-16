@@ -17,6 +17,7 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 
 </div>
 
+![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
 ---
 
 ## Screenshots
