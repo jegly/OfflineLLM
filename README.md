@@ -18,6 +18,7 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 </div>
 
 ---
+If this project helped you, please ⭐️ star it to help others find it 
 
 ## Screenshots
 
