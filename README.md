@@ -56,10 +56,13 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 
 | Model | Size | Best For |
 |---|---|---|
+| Model (Q4_K_M) | Approx. Size | RAM Required / Best For |
+| :--- | :--- | :--- |
 | Gemma 3 270M Q4_K_M | ~300 MB | 4GB RAM devices, fast responses |
 | Qwen3.5 0.8B Q4_K_M | ~530 MB | Good balance for 4-6GB RAM |
-| Gemma 3 1B Q4_K_M | ~750 MB | Recommended for 6-8GB RAM |
-| Qwen3.5 4B Q4_K_M | ~2.5 GB | Best quality for 8GB+ RAM |
+| **gemma-4-E2B-it-GGUF** (2.3B effective) | **~1.3 GB** | **Recommended for 6-8GB RAM** |
+| Qwen3.5 4B Q4_K_M | ~2.5 GB | Best quality for 8GB+ RAM | **Recommended for 6-8GB RAM** |
+| **gemma-4-E4B-it-GGUF** (4.5B effective) | **~2.5 GB** | **Best quality for 8GB+ RAM, advanced reasoning** |
 
 Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Choose `Q4_K_M` quantization for best quality/speed balance.
 
