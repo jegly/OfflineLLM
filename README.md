@@ -14,10 +14,9 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-orange.svg)](https://github.com/ggerganov/llama.cpp)
 [![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-
+![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
 </div>
 
-![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
 ---
 
 ## Screenshots
