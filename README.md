@@ -82,6 +82,7 @@ adb install OfflineLLM-v4.0.0-signed_release.apk
     
 
 ```
+**SHA256SUM:** 9c36b1dc7e0eec0c4c32e0706c2769d1d612eafbfca6070acf022ac29f34c4f8
 
 ---
 
