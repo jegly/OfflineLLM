@@ -57,7 +57,7 @@ function(build_library target_name)
     )
     target_link_libraries(
             ${target_name}
-            android log llama common
+            android log llama common vulkan
     )
     target_link_options(
             ${target_name}

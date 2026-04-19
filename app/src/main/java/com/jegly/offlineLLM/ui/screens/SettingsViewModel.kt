@@ -27,7 +27,7 @@ data class SettingsUiState(
     val models: List<ModelInfo> = emptyList(),
     val activeModel: ModelInfo? = null,
     val temperature: Float = 0.7f,
-    val maxTokens: Int = 512,
+    val maxTokens: Int = 2048,
     val contextSize: Int = 4096,
     val topP: Float = 0.9f,
     val topK: Int = 40,
@@ -40,9 +40,13 @@ data class SettingsUiState(
     val sensitiveDataAccessibilityEnabled: Boolean = true,
     val secureStorageBackend: String = "Unknown",
     val systemPromptKey: String = "default",
+    val customSystemPrompt: String = "",
     val themeMode: String = "SYSTEM",
     val accentColor: String = "dynamic",
     val disableThinking: Boolean = true,
+    val mathLatexHints: Boolean = false,
+    val translatorFrom: String = "en",
+    val translatorTo: String = "es",
     val isImportingModel: Boolean = false,
 )
 
@@ -87,9 +91,13 @@ class SettingsViewModel @Inject constructor(
             sensitiveDataAccessibilityEnabled = settingsRepository.sensitiveDataAccessibilityEnabled,
             secureStorageBackend = settingsRepository.secureStorageBackend,
             systemPromptKey = settingsRepository.systemPromptKey,
+            customSystemPrompt = settingsRepository.customSystemPrompt,
             themeMode = settingsRepository.themeMode,
             accentColor = settingsRepository.accentColor,
             disableThinking = settingsRepository.disableThinking,
+            mathLatexHints = settingsRepository.mathLatexHints,
+            translatorFrom = settingsRepository.translatorFrom,
+            translatorTo = settingsRepository.translatorTo,
         )
     }
 
@@ -158,6 +166,11 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(systemPromptKey = key) }
     }
 
+    fun setCustomSystemPrompt(value: String) {
+        settingsRepository.customSystemPrompt = value
+        _uiState.update { it.copy(customSystemPrompt = value) }
+    }
+
     fun setTheme(mode: ThemeMode) {
         settingsRepository.themeMode = mode.name
         _uiState.update { it.copy(themeMode = mode.name) }
@@ -171,6 +184,21 @@ class SettingsViewModel @Inject constructor(
     fun setDisableThinking(disabled: Boolean) {
         settingsRepository.disableThinking = disabled
         _uiState.update { it.copy(disableThinking = disabled) }
+    }
+
+    fun setMathLatexHints(enabled: Boolean) {
+        settingsRepository.mathLatexHints = enabled
+        _uiState.update { it.copy(mathLatexHints = enabled) }
+    }
+
+    fun setTranslatorFrom(code: String) {
+        settingsRepository.translatorFrom = code
+        _uiState.update { it.copy(translatorFrom = code) }
+    }
+
+    fun setTranslatorTo(code: String) {
+        settingsRepository.translatorTo = code
+        _uiState.update { it.copy(translatorTo = code) }
     }
 
     fun selectModel(modelId: Long) {

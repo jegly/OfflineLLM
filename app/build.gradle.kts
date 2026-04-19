@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -9,20 +8,21 @@ plugins {
 
 android {
     namespace = "com.jegly.offlineLLM"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.jegly.offlineLLM"
         minSdk = 30
-        targetSdk = 36
-        versionCode = 4
-        versionName = "4.0.0"
+        targetSdk = 37
+        versionCode = 5
+        versionName = "5.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,9 +34,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
     }
@@ -44,6 +41,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
@@ -93,6 +96,10 @@ dependencies {
 
     // Serialization
     implementation(libs.serialization.json)
+
+    // Markdown rendering
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.markdown.renderer.code)
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)

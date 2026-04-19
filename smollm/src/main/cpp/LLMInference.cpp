@@ -14,7 +14,8 @@
 void
 LLMInference::loadModel(const char *model_path, float minP, float temperature, float topP, int topK,
                         float repeatPenalty, bool storeChats, long contextSize,
-                        const char *chatTemplate, int nThreads, bool useMmap, bool useMlock) {
+                        const char *chatTemplate, int nThreads, bool useMmap, bool useMlock,
+                        int nGpuLayers) {
     LOGi("loading model with"
          "\n\tmodel_path = %s"
          "\n\tminP = %f"
@@ -26,15 +27,17 @@ LLMInference::loadModel(const char *model_path, float minP, float temperature, f
          "\n\tcontextSize = %li"
          "\n\tnThreads = %d"
          "\n\tuseMmap = %d"
-         "\n\tuseMlock = %d",
+         "\n\tuseMlock = %d"
+         "\n\tnGpuLayers = %d",
          model_path, minP, temperature, topP, topK, repeatPenalty, storeChats, contextSize,
-         nThreads, useMmap, useMlock);
+         nThreads, useMmap, useMlock, nGpuLayers);
 
     ggml_backend_load_all();
 
     llama_model_params model_params = llama_model_default_params();
     model_params.use_mmap = useMmap;
     model_params.use_mlock = useMlock;
+    model_params.n_gpu_layers = nGpuLayers;
     _model = llama_model_load_from_file(model_path, model_params);
     if (!_model) {
         LOGe("failed to load model from %s", model_path);

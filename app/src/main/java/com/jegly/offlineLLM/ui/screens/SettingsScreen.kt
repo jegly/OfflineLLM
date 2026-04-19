@@ -290,6 +290,15 @@ fun SettingsScreen(
                     ) { Text("$value") }
                 }
             }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(3000, 3500, 4000).forEach { value ->
+                    Button(
+                        onClick = { viewModel.setMaxTokens(value) },
+                        colors = if (uiState.maxTokens == value) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
+                        modifier = Modifier.weight(1f),
+                    ) { Text("$value") }
+                }
+            }
 
             // Context size slider
             var ctxValue by remember { mutableFloatStateOf(uiState.contextSize.toFloat()) }
@@ -323,7 +332,7 @@ fun SettingsScreen(
             // === SYSTEM PROMPT ===
             SectionHeader("System Prompt")
             var promptExpanded by remember { mutableStateOf(false) }
-            var customPrompt by rememberSaveable { mutableStateOf("") }
+            var customPrompt by rememberSaveable { mutableStateOf(uiState.customSystemPrompt) }
             ExposedDropdownMenuBox(expanded = promptExpanded, onExpandedChange = { promptExpanded = it }) {
                 OutlinedTextField(
                     value = SystemPrompts.getLabel(uiState.systemPromptKey),
@@ -341,8 +350,74 @@ fun SettingsScreen(
                     }
                 }
             }
+            if (uiState.systemPromptKey == "translator") {
+                var fromExpanded by remember { mutableStateOf(false) }
+                var toExpanded by remember { mutableStateOf(false) }
+                val fromLabel = SystemPrompts.languages.find { it.code == uiState.translatorFrom }?.label ?: "English"
+                val toLabel = SystemPrompts.languages.find { it.code == uiState.translatorTo }?.label ?: "Spanish"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = fromExpanded,
+                        onExpandedChange = { fromExpanded = it },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        OutlinedTextField(
+                            value = fromLabel,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("From") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = fromExpanded) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        )
+                        ExposedDropdownMenu(expanded = fromExpanded, onDismissRequest = { fromExpanded = false }) {
+                            SystemPrompts.languages.forEach { lang ->
+                                DropdownMenuItem(
+                                    text = { Text(lang.label) },
+                                    onClick = { viewModel.setTranslatorFrom(lang.code); fromExpanded = false },
+                                )
+                            }
+                        }
+                    }
+                    ExposedDropdownMenuBox(
+                        expanded = toExpanded,
+                        onExpandedChange = { toExpanded = it },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        OutlinedTextField(
+                            value = toLabel,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("To") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = toExpanded) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        )
+                        ExposedDropdownMenu(expanded = toExpanded, onDismissRequest = { toExpanded = false }) {
+                            SystemPrompts.languages.forEach { lang ->
+                                DropdownMenuItem(
+                                    text = { Text(lang.label) },
+                                    onClick = { viewModel.setTranslatorTo(lang.code); toExpanded = false },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
             if (uiState.systemPromptKey == "custom") {
-                OutlinedTextField(value = customPrompt, onValueChange = { customPrompt = it }, label = { Text("Custom System Prompt") }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 6)
+                OutlinedTextField(value = customPrompt, onValueChange = { customPrompt = it; viewModel.setCustomSystemPrompt(it) }, label = { Text("Custom System Prompt") }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 6)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("LaTeX Math Hints")
+                    Text("Instruct the model to use \$...\$ notation for math", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = uiState.mathLatexHints, onCheckedChange = { viewModel.setMathLatexHints(it) })
             }
 
             HorizontalDivider()

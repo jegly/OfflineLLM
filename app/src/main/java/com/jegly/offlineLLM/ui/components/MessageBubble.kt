@@ -63,14 +63,18 @@ fun MessageBubble(
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 SelectionContainer {
-                    Text(
-                        text = content,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (isUser)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (isUser) {
+                        Text(
+                            text = content,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    } else {
+                        MarkdownText(
+                            content = content,
+                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 // TTS button for assistant messages only
                 if (!isUser && onSpeak != null) {

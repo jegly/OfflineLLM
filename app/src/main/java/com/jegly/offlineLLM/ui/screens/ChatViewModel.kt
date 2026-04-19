@@ -59,6 +59,7 @@ class ChatViewModel @Inject constructor(
 
     private val memoryMonitor = MemoryMonitor(application)
     private val ttsHelper = TtsHelper(application)
+    private var navigationJob: kotlinx.coroutines.Job? = null
 
     init {
         setupCollectors()
@@ -134,8 +135,15 @@ class ChatViewModel @Inject constructor(
         if (modelId == -1L) return
 
         val systemPrompt = SystemPrompts.getPrompt(
-            settingsRepository.systemPromptKey
-        )
+            settingsRepository.systemPromptKey,
+            settingsRepository.customSystemPrompt,
+            settingsRepository.translatorFrom,
+            settingsRepository.translatorTo,
+        ).let {
+            if (settingsRepository.mathLatexHints)
+                "$it\nFor mathematical expressions, always use \$...\$ for inline math and \$\$...\$\$ for block math."
+            else it
+        }
 
         // Get existing messages for context
         val messages = chatRepository.getMessagesSync(conversation.id)
@@ -184,7 +192,11 @@ class ChatViewModel @Inject constructor(
             
             val query = if (model != null && PromptFormatter.isGemma4(model.name, model.chatTemplate)) {
                 // Manually format for Gemma 4 if detected
-                val systemPrompt = SystemPrompts.getPrompt(settingsRepository.systemPromptKey)
+                val systemPrompt = SystemPrompts.getPrompt(settingsRepository.systemPromptKey, settingsRepository.customSystemPrompt, settingsRepository.translatorFrom, settingsRepository.translatorTo).let {
+                    if (settingsRepository.mathLatexHints)
+                        "$it\nFor mathematical expressions, always use \$...\$ for inline math and \$\$...\$\$ for block math."
+                    else it
+                }
                 val historyMessages = chatRepository.getMessagesSync(conversation.id).dropLast(1)
                 val history = historyMessages.map { it.role to it.content }
                 PromptFormatter.formatGemma4Prompt(systemPrompt, history, sanitized)
@@ -243,8 +255,18 @@ class ChatViewModel @Inject constructor(
     }
 
     fun newConversation() {
-        viewModelScope.launch {
+        navigationJob?.cancel()
+        navigationJob = viewModelScope.launch {
+            // Save any in-progress partial response before unloading
+            val partial = _uiState.value.partialResponse
+            val currentConv = _uiState.value.currentConversation
+            if (partial.isNotBlank() && currentConv != null) {
+                chatRepository.addMessage(currentConv.id, "assistant", partial)
+            }
+            _uiState.update { it.copy(isGenerating = false, partialResponse = "") }
+
             modelManager.unloadModel()
+
             val conversation = chatRepository.createConversation(
                 title = "Chat ${chatRepository.getConversationCount() + 1}"
             )
@@ -263,7 +285,16 @@ class ChatViewModel @Inject constructor(
             _uiState.update { it.copy(showConversationDrawer = false) }
             return
         }
-        viewModelScope.launch {
+        navigationJob?.cancel()
+        navigationJob = viewModelScope.launch {
+            // Save any in-progress partial response before unloading
+            val partial = _uiState.value.partialResponse
+            val currentConv = _uiState.value.currentConversation
+            if (partial.isNotBlank() && currentConv != null) {
+                chatRepository.addMessage(currentConv.id, "assistant", partial)
+            }
+            _uiState.update { it.copy(isGenerating = false, partialResponse = "") }
+
             modelManager.unloadModel()
             _uiState.update {
                 it.copy(

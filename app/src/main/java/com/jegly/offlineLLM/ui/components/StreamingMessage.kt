@@ -14,9 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -44,15 +41,9 @@ fun StreamingMessage(
             SelectionContainer {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        text = buildAnnotatedString {
-                            append(partialResponse)
-                            // Blinking cursor effect
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("▍")
-                            }
-                        },
+                        text = "$partialResponse▍",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

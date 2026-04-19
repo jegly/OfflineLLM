@@ -157,7 +157,7 @@ class ModelManager(
         )
     }
 
-    fun unloadModel() {
+    suspend fun unloadModel() {
         inferenceEngine.unloadModel()
         _modelState.value = ModelState.NotLoaded
     }

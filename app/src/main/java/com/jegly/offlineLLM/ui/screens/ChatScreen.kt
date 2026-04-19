@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,6 +48,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,10 +103,36 @@ fun ChatScreen(
         viewModel.initialize()
     }
 
+    val isAtBottom by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+            val total = listState.layoutInfo.totalItemsCount
+            lastVisible == null || lastVisible.index >= total - 2
+        }
+    }
+
+    // isDragged is ONLY true when the user's finger is physically dragging —
+    // not during flings, not during programmatic scrolls. This lets us
+    // distinguish user intent from auto-scroll animations.
+    val isDragged by listState.interactionSource.collectIsDraggedAsState()
+
+    // Sticky flag: only a real finger drag away from the bottom disables it.
+    // Re-enabled as soon as the list is back at the bottom.
+    var autoScrollEnabled by remember { mutableStateOf(true) }
+
+    LaunchedEffect(isDragged, isAtBottom) {
+        when {
+            isAtBottom -> autoScrollEnabled = true
+            isDragged && !isAtBottom -> autoScrollEnabled = false
+        }
+    }
+
     LaunchedEffect(uiState.messages.size, uiState.partialResponse) {
-        val totalItems = uiState.messages.size + (if (uiState.isGenerating) 1 else 0)
-        if (totalItems > 0) {
-            listState.animateScrollToItem(totalItems - 1)
+        if (autoScrollEnabled) {
+            val totalItems = uiState.messages.size + (if (uiState.isGenerating) 1 else 0)
+            if (totalItems > 0) {
+                listState.scrollToItem(totalItems - 1)
+            }
         }
     }
 

@@ -1,13 +1,26 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
 }
+
+val sdkDir: String = rootProject.file("local.properties")
+    .takeIf { it.exists() }
+    ?.readLines()
+    ?.firstOrNull { it.startsWith("sdk.dir=") }
+    ?.removePrefix("sdk.dir=")
+    ?.trim()
+    ?: System.getenv("ANDROID_HOME")
+    ?: System.getenv("ANDROID_SDK_ROOT")
+    ?: ""
 
 android {
     namespace = "com.jegly.offlineLLM.smollm"
-    compileSdk = 36
+    compileSdk = 37
+    ndkVersion = "27.2.12479018"
+    namespace = "com.jegly.offlineLLM.smollm"
+    compileSdk = 37
     ndkVersion = "27.2.12479018"
 
+    defaultConfig
     defaultConfig {
         minSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -21,6 +34,9 @@ android {
                 arguments += "-DLLAMA_BUILD_COMMON=ON"
                 arguments += "-DLLAMA_CURL=OFF"
                 arguments += "-DGGML_LLAMAFILE=OFF"
+                if (sdkDir.isNotEmpty()) {
+                    arguments += "-DCMAKE_MAKE_PROGRAM=$sdkDir/cmake/3.22.1/bin/ninja"
+                }
             }
         }
     }
@@ -35,14 +51,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

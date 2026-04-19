@@ -51,15 +51,17 @@ class SettingsRepository @Inject constructor(
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_ACCENT_COLOR = "accent_color"
         const val KEY_DISABLE_THINKING = "disable_thinking"
-
+        const val KEY_MATH_LATEX_HINTS = "math_latex_hints"
+        const val KEY_TRANSLATOR_FROM = "translator_from"
+        const val KEY_TRANSLATOR_TO = "translator_to"
         const val DEFAULT_TEMPERATURE = 0.7f
-        const val DEFAULT_MAX_TOKENS = 512
+        const val DEFAULT_MAX_TOKENS = 2048
         const val DEFAULT_CONTEXT_SIZE = 4096
         const val DEFAULT_TOP_P = 0.9f
         const val DEFAULT_TOP_K = 40
         const val DEFAULT_MIN_P = 0.1f
         const val DEFAULT_REPEAT_PENALTY = 1.1f
-        const val DEFAULT_NUM_THREADS = 4
+        val DEFAULT_NUM_THREADS = (Runtime.getRuntime().availableProcessors() / 2).coerceIn(4, 8)
 
         const val DEFAULT_SCREENSHOT_PROTECTION = true
         const val DEFAULT_TAPJACKING_PROTECTION = true
@@ -180,4 +182,16 @@ class SettingsRepository @Inject constructor(
     var disableThinking: Boolean
         get() = prefs.getBoolean(KEY_DISABLE_THINKING, true)
         set(value) = prefs.edit().putBoolean(KEY_DISABLE_THINKING, value).apply()
+
+    var mathLatexHints: Boolean
+        get() = prefs.getBoolean(KEY_MATH_LATEX_HINTS, false)
+        set(value) = prefs.edit().putBoolean(KEY_MATH_LATEX_HINTS, value).apply()
+
+    var translatorFrom: String
+        get() = prefs.getString(KEY_TRANSLATOR_FROM, "en") ?: "en"
+        set(value) = prefs.edit().putString(KEY_TRANSLATOR_FROM, value).apply()
+
+    var translatorTo: String
+        get() = prefs.getString(KEY_TRANSLATOR_TO, "es") ?: "es"
+        set(value) = prefs.edit().putString(KEY_TRANSLATOR_TO, value).apply()
 }

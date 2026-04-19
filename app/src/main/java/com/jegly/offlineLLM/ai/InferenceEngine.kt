@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -75,16 +76,25 @@ class InferenceEngine {
         }
     }
 
-    fun unloadModel() {
+    suspend fun unloadModel() {
+        val jobToJoin: Job?
         stateLock.withLock {
-            generationJob?.cancel()
             loadJob?.cancel()
+            jobToJoin = generationJob
             isModelLoaded.set(false)
             isGenerating = false
-            try {
-                instance.close()
-            } catch (_: Exception) {}
         }
+        // Signal the native side to stop first — this makes the blocking
+        // completionLoop() JNI call return promptly instead of waiting for
+        // the next token, so the coroutine cancellation can take effect.
+        try { instance.stop() } catch (_: Exception) {}
+        jobToJoin?.cancel()
+        // Now wait for the generation coroutine to fully exit before freeing
+        // native memory. 5 s timeout as a safeguard against a stuck JNI call.
+        withTimeoutOrNull(5_000) {
+            try { jobToJoin?.join() } catch (_: Exception) {}
+        }
+        try { instance.close() } catch (_: Exception) {}
     }
 
     fun generateResponse(
@@ -105,37 +115,43 @@ class InferenceEngine {
             generationJob = CoroutineScope(Dispatchers.Default).launch {
                 try {
                     isGenerating = true
-                    var fullResponse = ""
+                    val fullResponse = StringBuilder()
                     var stopRequested = false
+                    var tokensSinceLastEmit = 0
 
                     val duration = measureTime {
-                        // Use collect but check for stop sequences to break manually
                         instance.getResponseAsFlow(query).collect { piece ->
                             if (stopRequested) return@collect
-                            
-                            fullResponse += piece
-                            
-                            // Check if we hit a stop sequence
-                            if (containsStopSequence(fullResponse)) {
+
+                            fullResponse.append(piece)
+
+                            // Only scan the tail for stop sequences — avoids full-string scan every token
+                            val tail = if (fullResponse.length > 200) fullResponse.substring(fullResponse.length - 200) else fullResponse.toString()
+                            if (containsStopSequence(tail)) {
                                 stopRequested = true
-                                // We don't cancel the job, we just stop collecting pieces
                                 return@collect
                             }
 
-                            // Emission logic: don't emit if we're currently typing a potential tag
-                            val displayResponse = cleanModelOutput(fullResponse, isFinal = false)
-                            if (displayResponse.isNotBlank() || fullResponse.isEmpty()) {
-                                withContext(Dispatchers.Main) {
-                                    onToken(displayResponse)
+                            // Batch UI updates every 3 tokens to reduce Main thread dispatches
+                            // and Compose recompositions without visible latency
+                            tokensSinceLastEmit++
+                            if (tokensSinceLastEmit >= 3) {
+                                tokensSinceLastEmit = 0
+                                val displayResponse = cleanModelOutput(fullResponse.toString(), isFinal = false)
+                                if (displayResponse.isNotBlank() || fullResponse.isEmpty()) {
+                                    withContext(Dispatchers.Main) {
+                                        onToken(displayResponse)
+                                    }
                                 }
                             }
                         }
                     }
 
                     // Final cleanup
-                    val finalResponse = cleanModelOutput(fullResponse, isFinal = true).let {
+                    val fullResponseStr = fullResponse.toString()
+                    val finalResponse = cleanModelOutput(fullResponseStr, isFinal = true).let {
                         if (it.isBlank()) {
-                            if (fullResponse.isNotBlank()) "(No visible content produced)" else "(Empty response)"
+                            if (fullResponseStr.isNotBlank()) "(No visible content produced)" else "(Empty response)"
                         } else it
                     }
 
@@ -194,6 +210,7 @@ class InferenceEngine {
     }
 
     fun stopGeneration() {
+        try { instance.stop() } catch (_: Exception) {}
         stateLock.withLock {
             generationJob?.cancel()
             isGenerating = false

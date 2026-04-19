@@ -65,7 +65,7 @@ class SmolLM {
         private fun supportsArm64V8a(): Boolean = Build.SUPPORTED_ABIS[0] == "arm64-v8a"
     }
 
-    private var nativePtr = 0L
+    @Volatile private var nativePtr = 0L
 
     data class InferenceParams(
         val minP: Float = 0.1f,
@@ -106,6 +106,7 @@ class SmolLM {
                 params.numThreads,
                 params.useMmap,
                 params.useMlock,
+                0,
             )
         }
 
@@ -140,15 +141,24 @@ class SmolLM {
         return getContextSizeUsed(nativePtr)
     }
 
+    fun stop() {
+        val ptr = nativePtr
+        if (ptr != 0L) stopCompletion(ptr)
+    }
+
     fun getResponseAsFlow(query: String): Flow<String> = flow {
         verifyHandle()
-        startCompletion(nativePtr, query)
-        var piece = completionLoop(nativePtr)
-        while (piece != "[EOG]") {
-            emit(piece)
-            piece = completionLoop(nativePtr)
+        val ptr = nativePtr
+        startCompletion(ptr, query)
+        try {
+            while (nativePtr != 0L) {
+                val piece = completionLoop(nativePtr)
+                if (piece == "[EOG]") break
+                emit(piece)
+            }
+        } finally {
+            if (nativePtr != 0L) stopCompletion(nativePtr)
         }
-        stopCompletion(nativePtr)
     }
 
     fun getResponse(query: String): String {
@@ -171,8 +181,9 @@ class SmolLM {
 
     fun close() {
         if (nativePtr != 0L) {
-            close(nativePtr)
-            nativePtr = 0L
+            val ptr = nativePtr
+            nativePtr = 0L  // zero before native free so flow loops see it immediately
+            close(ptr)
         }
     }
 
@@ -185,7 +196,7 @@ class SmolLM {
     private external fun loadModel(
         modelPath: String, minP: Float, temperature: Float, topP: Float, topK: Int,
         repeatPenalty: Float, storeChats: Boolean, contextSize: Long, chatTemplate: String,
-        nThreads: Int, useMmap: Boolean, useMlock: Boolean
+        nThreads: Int, useMmap: Boolean, useMlock: Boolean, nGpuLayers: Int
     ): Long
 
     private external fun addChatMessage(modelPtr: Long, message: String, role: String)
