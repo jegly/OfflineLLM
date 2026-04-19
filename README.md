@@ -64,11 +64,10 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 - **On-Device Inference** — Runs GGUF models via llama.cpp with optimized ARM NEON/SVE/i8mm native libraries
 - **Streaming Responses** — Token-by-token output (~25 tok/s on budget devices, 40-60+ on flagships)
 - **Import Any Model** — Bring your own GGUF models at runtime via file picker
-- **Translator** - 75+ languages now supported !!
 - **Multiple Conversations** — Auto-titled from your first message, renameable, searchable
 - **Advanced Sampling** — Temperature, Top-P, Top-K, Min-P, Repeat Penalty with explanations
 - **Theming** — System/Light/Dark/AMOLED Black + 9 accent colour options
-- **System Prompts** — General, Coder, Creative Writer, Tutor, Translator (75+ languages)
+- **System Prompts** — General, Coder, Creative Writer, Tutor, Translator (75+ languages), or write your own
 - **Markdown Rendering** — Assistant responses render bold, italic, code blocks, and lists
 - **Text-to-Speech** — Read AI responses aloud using your device's TTS engine
 - **Thinking Tag Stripping** — Hides `<think>` blocks from reasoning models like Qwen
@@ -86,9 +85,9 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 | **gemma-3-270m-it-qat-Q4_K_M.gguf** | ~300 MB | 2-4GB RAM devices, fast responses |
 | **Qwen3.5 0.8B Q4_K_M** | ~530 MB | Good balance for 4-6GB RAM |
 | **gemma-4-E2B-it-GGUF** (2.3B effective) | **~1.3 GB** | **Recommended for 6-8GB RAM** |
-| **Qwen3.5 4B Q4_K_M** | ~2.5 GB |  8GB+ RAM | **Recommended for 6-8GB RAM** |
-| **gemma-4-E4B-it-GGUF** (4.5B effective) | Flagship **~2.5 GB** | **Recommended for 8GB RAM** |
-| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Flagship (12 GB+ RAM),  |
+| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Best quality for 8GB+ RAM | **Recommended for 6-8GB RAM** |
+| **gemma-4-E4B-it-GGUF** (4.5B effective) | **~2.5 GB** | **Recommended for 6-8GB RAM** |
+| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Flagship (12 GB+ RAM), best quality |
 
 Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Choose `Q4_K_M` quantization for best quality/speed balance.
 
@@ -113,7 +112,7 @@ All releases are identical in features — the only difference is whether a mode
 
 Or via ADB:
 ```bash
-adb install OfflineLLM_V5_Variant_of_will.apk
+adb install OfflineLLM_V5_Signed_Release.apk
     
     
 
