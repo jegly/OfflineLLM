@@ -105,7 +105,7 @@ v5.0.0 now ships in three flavours — pick the one that matches your device:
 | **Qwen3.5 0.8B** | Qwen3.5 0.8B Q4_K_M | ~600 MB | Everyday use, 4–6 GB RAM |
 | **Gemma4-E2B** | Gemma4-E2B-it Q4_K_M | ~1.4 GB | Best quality, 6–8 GB RAM — [Download from HuggingFace](https://huggingface.co/jegly/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk/resolve/main/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk) |
 
-> **Note:** The Gemma4-E2B APK is hosted on HuggingFace due to GitHub's 2 GB file limit. For flagship devices, download the Vanilla APK and import `gemma-4-E4B-it-GGUF` manually from HuggingFace.
+> **Note:** The Gemma4-E2B APK is hosted on HuggingFace due to GitHub's 2 GB file limit. 
 
 All releases are identical in features — the only difference is whether a model comes pre-loaded.
 
