@@ -15,6 +15,7 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 [![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 ![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
+[![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-Releases-FFD21E.svg)](https://huggingface.co/jegly)
 </div>
 
 ---
@@ -64,10 +65,11 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 - **On-Device Inference** — Runs GGUF models via llama.cpp with optimized ARM NEON/SVE/i8mm native libraries
 - **Streaming Responses** — Token-by-token output (~25 tok/s on budget devices, 40-60+ on flagships)
 - **Import Any Model** — Bring your own GGUF models at runtime via file picker
+- **Translator** - 75+ languages now supported !!
 - **Multiple Conversations** — Auto-titled from your first message, renameable, searchable
 - **Advanced Sampling** — Temperature, Top-P, Top-K, Min-P, Repeat Penalty with explanations
 - **Theming** — System/Light/Dark/AMOLED Black + 9 accent colour options
-- **System Prompts** — General, Coder, Creative Writer, Tutor, Translator (75+ languages), or write your own
+- **System Prompts** — General, Coder, Creative Writer, Tutor, Translator (75+ languages)
 - **Markdown Rendering** — Assistant responses render bold, italic, code blocks, and lists
 - **Text-to-Speech** — Read AI responses aloud using your device's TTS engine
 - **Thinking Tag Stripping** — Hides `<think>` blocks from reasoning models like Qwen
@@ -85,9 +87,9 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 | **gemma-3-270m-it-qat-Q4_K_M.gguf** | ~300 MB | 2-4GB RAM devices, fast responses |
 | **Qwen3.5 0.8B Q4_K_M** | ~530 MB | Good balance for 4-6GB RAM |
 | **gemma-4-E2B-it-GGUF** (2.3B effective) | **~1.3 GB** | **Recommended for 6-8GB RAM** |
-| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Best quality for 8GB+ RAM | **Recommended for 6-8GB RAM** |
-| **gemma-4-E4B-it-GGUF** (4.5B effective) | **~2.5 GB** | **Recommended for 6-8GB RAM** |
-| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Flagship (12 GB+ RAM), best quality |
+| **Qwen3.5 4B Q4_K_M** | ~2.5 GB |  8GB+ RAM | **Recommended for 6-8GB RAM** |
+| **gemma-4-E4B-it-GGUF** (4.5B effective) | Flagship **~2.5 GB** | **Recommended for 8GB RAM** |
+| **Qwen3.5 4B Q4_K_M** | ~2.5 GB | Flagship (12 GB+ RAM),  |
 
 Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Choose `Q4_K_M` quantization for best quality/speed balance.
 
@@ -101,7 +103,9 @@ v5.0.0 now ships in three flavours — pick the one that matches your device:
 |---|---|---|---|
 | **Vanilla** | None (bring your own) | Small | Users with their own GGUF model |
 | **Qwen3.5 0.8B** | Qwen3.5 0.8B Q4_K_M | ~600 MB | Everyday use, 4–6 GB RAM |
-| **Gemma4-E2B** | Gemma4-E2B-it Q4_K_M | ~1.4 GB | Best quality, 6–8 GB RAM |
+| **Gemma4-E2B** | Gemma4-E2B-it Q4_K_M | ~1.4 GB | Best quality, 6–8 GB RAM — [Download from HuggingFace](https://huggingface.co/jegly/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk/resolve/main/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk) |
+
+> **Note:** The Gemma4-E2B APK is hosted on HuggingFace due to GitHub's 2 GB file limit. For flagship devices, download the Vanilla APK and import `gemma-4-E4B-it-GGUF` manually from HuggingFace.
 
 All releases are identical in features — the only difference is whether a model comes pre-loaded.
 
@@ -112,7 +116,7 @@ All releases are identical in features — the only difference is whether a mode
 
 Or via ADB:
 ```bash
-adb install OfflineLLM_V5_Signed_Release.apk
+adb install OfflineLLM_V5_Variant_of_will.apk
     
     
 
