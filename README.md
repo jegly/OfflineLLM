@@ -8,14 +8,15 @@ The only Android LLM app that literally cannot phone home.
 All LLM inference runs entirely on-device via llama.cpp.
 No internet. No cloud. No tracking. Your conversations stay yours.
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Android](https://img.shields.io/badge/Android-14%2B-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-orange.svg)](https://github.com/ggerganov/llama.cpp)
-[![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-red.svg)]()
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
-[![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-Releases-FFD21E.svg)](https://huggingface.co/jegly)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3-6272A4.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Android](https://img.shields.io/badge/Android-14%2B-50FA7B.svg?logo=android&logoColor=white)](https://developer.android.com)
+[![Version](https://img.shields.io/badge/Version-5.0.0-BD93F9.svg)](https://github.com/jegly/OfflineLLM/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-8BE9FD.svg)](LICENSE)
+[![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-FFB86C.svg)](https://github.com/ggerganov/llama.cpp)
+[![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-FF5555.svg)]()
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-FF79C6.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+![GitHub all releases](https://img.shields.io/badge/Downloads-↓%20Total-F1FA8C.svg?logo=github)
+[![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-Releases-F1FA8C.svg)](https://huggingface.co/jegly)
 </div>
 
 ---
