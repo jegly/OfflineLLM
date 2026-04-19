@@ -8,7 +8,7 @@ The only Android LLM app that literally cannot phone home.
 All LLM inference runs entirely on-device via llama.cpp.
 No internet. No cloud. No tracking. Your conversations stay yours.
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-14%2B-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-orange.svg)](https://github.com/ggerganov/llama.cpp)
@@ -65,15 +65,17 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 - **Streaming Responses** — Token-by-token output (~25 tok/s on budget devices, 40-60+ on flagships)
 - **Import Any Model** — Bring your own GGUF models at runtime via file picker
 - **Multiple Conversations** — Auto-titled from your first message, renameable, searchable
+- **Translator** - 75+ languages supported!
 - **Advanced Sampling** — Temperature, Top-P, Top-K, Min-P, Repeat Penalty with explanations
 - **Theming** — System/Light/Dark/AMOLED Black + 9 accent colour options
-- **System Prompts** — General, Coder, Creative Writer, Tutor, or write your own
+- **System Prompts** — General, Coder, Creative Writer, Tutor, Translator
+- **Markdown Rendering** — Assistant responses render bold, italic, code blocks, and lists
 - **Text-to-Speech** — Read AI responses aloud using your device's TTS engine
 - **Thinking Tag Stripping** — Hides `<think>` blocks from reasoning models like Qwen
 - **Security** — Encrypted settings, optional biometric lock, secure file deletion
 - **Chat Backup** — Export/import all conversations as JSON
 - **Built-in Help** — Guide for downloading models from HuggingFace
-- **Gemma4** - Now supported in Version 3
+- **Gemma 4** — Supported with automatic prompt template detection
 - **RAG** - Persistent memory feature coming soon !
 ## Recommended Models
 
@@ -113,7 +115,7 @@ adb install OfflineLLM_V5_Signed_Release.apk
 
 ### Prerequisites
 
-- JDK 17, Android SDK (compileSdk 36), NDK r27, CMake 3.22.1
+- JDK 17, Android SDK (compileSdk 37), NDK r27, CMake 3.22.1
 
 ```bash
 git clone --recurse-submodules https://github.com/jegly/OfflineLLM.git
