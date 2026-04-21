@@ -98,13 +98,13 @@ Search for the model name + "GGUF" on [HuggingFace](https://huggingface.co). Cho
 
 ## Install
 
-v5.0.0 now ships in three flavours — pick the one that matches your device:
+v5.0.1 now ships in three flavours — pick the one that matches your device:
 
 | Release | Bundled Model | APK Size | Best For |
 |---|---|---|---|
 | **Vanilla** | None (bring your own) | Small | Users with their own GGUF model |
 | **Qwen3.5 0.8B** | Qwen3.5 0.8B Q4_K_M | ~600 MB | Everyday use, 4–6 GB RAM |
-| **Gemma4-E2B** | Gemma4-E2B-it Q4_K_M | ~1.4 GB | Best quality, 6–8 GB RAM — [Download from HuggingFace](https://huggingface.co/jegly/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk/resolve/main/OfflineLLM_V5_Signed_Release_Gemma4_E2B_IT.apk) |
+| **Gemma4-E2B** | Gemma4-E2B-it Q4_K_M | ~1.4 GB | Best quality, 6–8 GB RAM — [Download from HuggingFace](https://huggingface.co/jegly/OfflineLLM_V5.0.1_Signed_Release_Gemma4_E2B_IT.apk/blob/main/OfflineLLM_V5.0.1_Signed_Release_Gemma4_E2B_IT.apk) |
 
 > **Note:** The Gemma4-E2B APK is hosted on HuggingFace due to GitHub's 2 GB file limit. 
 
