@@ -117,16 +117,16 @@ All releases are identical in features — the only difference is whether a mode
 
 Or via ADB:
 ```bash
-adb install OfflineLLM_V5.apk
+adb install OfflineLLM_V5.0.1.apk
     
     
 
 ```
-  - **SHA256SUM:** `12db25f084d0bad9481d090ca2939c95e6846627cb5e5fe2fe97e317089f44d6` —
+  - **SHA256SUM:** `3c6c89e0c4aa95fd1acd68070a295a9011faa235c786ad2f4648149a26f67305` —
   Vanilla                                                                                    
-  - **SHA256SUM:** `84a0b3eb267eb878a2858cab2d5cc972409951aefad46eb6ab20c003162ab016` —
+  - **SHA256SUM:** `839a795da2b1c85d27f3f29fbb1189d6935227ad905ad60d689ff6e5dfcf3205` —
   Qwen3.5 Release                                                                            
-  - **Xet hash:** `0cedd3eb750dca35683ced6814a34bd804980299e3d76fe4005edb1cdd4433e4` — Gemma4
+  - **Xet hash:** `69945c715660e1dcb098ee4db0157d783038db819d50043859a9fe099b75b1f7` — Gemma4
    Release      
 ```
 
