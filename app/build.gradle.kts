@@ -14,8 +14,8 @@ android {
         applicationId = "com.jegly.offlineLLM"
         minSdk = 30
         targetSdk = 37
-        versionCode = 5
-        versionName = "5.0.0"
+        versionCode = 6
+        versionName = "5.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
