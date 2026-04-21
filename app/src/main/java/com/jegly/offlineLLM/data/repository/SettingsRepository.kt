@@ -90,8 +90,8 @@ class SettingsRepository @Inject constructor(
             }.getOrDefault(false)
 
             val backend = when {
-                reflectStrongBox -> "StrongBox"
-                strongBoxAvailable -> "TEE" // StrongBox available, but the key may have fallen back.
+                strongBoxAvailable -> "StrongBox"  // Prioritize system feature detection
+                reflectStrongBox -> "StrongBox"    // Fallback to reflection
                 else -> "TEE"
             }
             requestedKey to backend
