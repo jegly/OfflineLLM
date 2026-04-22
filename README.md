@@ -10,7 +10,7 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3-6272A4.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-14%2B-50FA7B.svg?logo=android&logoColor=white)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-5.0.0-BD93F9.svg)](https://github.com/jegly/OfflineLLM/releases)
+[![Version](https://img.shields.io/badge/Version-5.0.1-BD93F9.svg)](https://github.com/jegly/OfflineLLM/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-8BE9FD.svg)](LICENSE)
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-FFB86C.svg)](https://github.com/ggerganov/llama.cpp)
 [![Offline](https://img.shields.io/badge/Network-Zero%20Permissions-FF5555.svg)]()
