@@ -78,7 +78,7 @@ Whether you’re an adventurer, living in an area with limited internet access, 
 - **Chat Backup** — Export/import all conversations as JSON
 - **Built-in Help** — Guide for downloading models from HuggingFace
 - **Gemma 4** — Supported with automatic prompt template detection
-- **RAG** - Persistent memory feature coming soon !
+
 ## Recommended Models
 
 | Model | Size | Best For |
