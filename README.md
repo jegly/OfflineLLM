@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="Screenshots/offlinellm-banner3.png" width="600" />
+<img src="Screenshots/offlinellm-banner3.png" width="800" />
 
 **The first of its kind,A fully offline, private AI chat app for Android**
 
