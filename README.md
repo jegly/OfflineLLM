@@ -17,10 +17,12 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-FF79C6.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 ![GitHub all releases](https://img.shields.io/github/downloads/jegly/OfflineLLM/total)
 [![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-Releases-F1FA8C.svg)](https://huggingface.co/jegly)
+<a href="https://www.buymeacoffee.com/jegly"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" height="41" width="174"></a> 
 </div>
 
 ---
 If this project helped you, please ⭐️ star it to help others find it 
+
 # Access Your Data Anytime, Anywhere
 
 **OfflineLLM** is designed with users who need reliable, offline access to their AI assistant, especially in scenarios where internet access is limited or unavailable. Whether you're off-grid, in a remote location, or simply need a way to interact with your data without relying on the cloud, **OfflineLLM** provides a solution that works entirely offline.
