@@ -1,0 +1,142 @@
+<svg width="900" height="260" viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1114"></stop>
+      <stop offset="100%" stop-color="#181b20"></stop>
+    </linearGradient>
+    <radialGradient id="glow1" cx="15%" cy="100%" r="55%">
+      <stop offset="0%" stop-color="#d1d5db" stop-opacity="0.06"></stop>
+      <stop offset="100%" stop-color="#d1d5db" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="glow2" cx="90%" cy="10%" r="50%">
+      <stop offset="0%" stop-color="#9ca3af" stop-opacity="0.05"></stop>
+      <stop offset="100%" stop-color="#9ca3af" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#374151"></stop>
+      <stop offset="50%" stop-color="#9ca3af"></stop>
+      <stop offset="100%" stop-color="#374151"></stop>
+    </linearGradient>
+
+    
+    <filter id="emboss" x="-5%" y="-20%" width="110%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.6" result="blur"></feGaussianBlur>
+      <feSpecularLighting in="blur" surfaceScale="3" specularConstant="0.9" specularExponent="18" lighting-color="#ffffff" result="spec">
+        <feDistantLight azimuth="225" elevation="55"></feDistantLight>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specMasked"></feComposite>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+        <feMergeNode in="specMasked"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs>
+
+  
+  <rect width="900" height="260" rx="12" fill="url(#bg)"></rect>
+  <rect width="900" height="260" rx="12" fill="url(#glow1)"></rect>
+  <rect width="900" height="260" rx="12" fill="url(#glow2)"></rect>
+
+  
+  <g opacity="0.05" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="52" x2="900" y2="52"></line>
+    <line x1="0" y1="104" x2="900" y2="104"></line>
+    <line x1="0" y1="156" x2="900" y2="156"></line>
+    <line x1="0" y1="208" x2="900" y2="208"></line>
+  </g>
+
+  
+  <g opacity="0.035" stroke="#ffffff" stroke-width="1">
+    <line x1="200" y1="0" x2="200" y2="260"></line>
+    <line x1="450" y1="0" x2="450" y2="260"></line>
+    <line x1="700" y1="0" x2="700" y2="260"></line>
+  </g>
+
+  
+  <g transform="translate(40, 55)">
+    <rect x="0" y="0" width="140" height="140" rx="18" fill="#1a1d22" stroke="#2a2e35" stroke-width="1"></rect>
+    
+    <rect x="1" y="1" width="138" height="138" rx="17" fill="none" stroke="#3a3f47" stroke-width="0.5" opacity="0.6"></rect>
+    
+    <g transform="translate(70,70)">
+      <circle cx="0" cy="0" r="44" fill="none" stroke="#d1d5db" stroke-width="3" opacity="0.9"></circle>
+      <circle cx="0" cy="0" r="32" fill="none" stroke="#6b7280" stroke-width="1.5" opacity="0.6"></circle>
+      
+      <line x1="-30" y1="30" x2="30" y2="-30" stroke="#d1d5db" stroke-width="3" stroke-linecap="round" opacity="0.9"></line>
+    </g>
+  </g>
+
+  
+  <text x="200" y="92" font-family="-apple-system, &#39;Segoe UI&#39;, Roboto, sans-serif" font-size="48" font-weight="700" fill="#e5e7eb" letter-spacing="-1" filter="url(#emboss)">OfflineLLM</text>
+
+  
+  <text x="200" y="120" font-family="-apple-system, &#39;Segoe UI&#39;, Roboto, sans-serif" font-size="15" font-weight="400" fill="#8b8f96">Private AI. On Device. Always Offline.</text>
+
+  
+  <g transform="translate(200, 140)" font-family="-apple-system, &#39;Segoe UI&#39;, Roboto, sans-serif" font-size="11" font-weight="500">
+    
+    <rect x="0" y="0" width="112" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="56" y="16" text-anchor="middle" fill="#f3f4f6">100% Offline</text>
+
+    
+    <rect x="120" y="0" width="130" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="185" y="16" text-anchor="middle" fill="#e5e7eb">llama.cpp · GGUF</text>
+
+    
+    <rect x="258" y="0" width="140" height="24" rx="12" fill="#15171a" stroke="#4b5058" stroke-width="1"></rect>
+    <text x="328" y="16" text-anchor="middle" fill="#d1d5db">Zero Net Permissions</text>
+
+    
+    <rect x="406" y="0" width="128" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="470" y="16" text-anchor="middle" fill="#e5e7eb">Bring Your Own GGUF</text>
+
+    
+    <rect x="542" y="0" width="126" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="605" y="16" text-anchor="middle" fill="#e5e7eb">75+ Translator Langs</text>
+  </g>
+
+  
+  <g transform="translate(200, 172)" font-family="-apple-system, &#39;Segoe UI&#39;, Roboto, sans-serif" font-size="11" font-weight="500">
+    
+    <rect x="0" y="0" width="140" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="70" y="16" text-anchor="middle" fill="#e5e7eb">Streaming 25–60 tok/s</text>
+
+    
+    <rect x="148" y="0" width="156" height="24" rx="12" fill="#15171a" stroke="#4b5058" stroke-width="1"></rect>
+    <text x="226" y="16" text-anchor="middle" fill="#d1d5db">ARM NEON · SVE · i8mm</text>
+
+    
+    <rect x="312" y="0" width="120" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="372" y="16" text-anchor="middle" fill="#e5e7eb">Biometric Lock</text>
+
+    
+    <rect x="440" y="0" width="118" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="499" y="16" text-anchor="middle" fill="#e5e7eb">Text-to-Speech</text>
+
+    
+    <rect x="566" y="0" width="104" height="24" rx="12" fill="#1f2328" stroke="#3a3f47" stroke-width="1"></rect>
+    <text x="618" y="16" text-anchor="middle" fill="#e5e7eb">Chat Backup</text>
+  </g>
+
+  
+  <rect x="200" y="200" width="240" height="2" rx="1" fill="url(#accent)"></rect>
+
+  
+  <g transform="translate(200, 215)" font-family="&#39;SF Mono&#39;, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#6b7280" letter-spacing="0.06em">
+    <text x="0" y="12">ANDROID 14+</text>
+    <text x="92" y="12" fill="#4b5563">·</text>
+    <text x="104" y="12">APACHE 2.0</text>
+    <text x="194" y="12" fill="#4b5563">·</text>
+    <text x="206" y="12">KOTLIN + COMPOSE</text>
+    <text x="348" y="12" fill="#4b5563">·</text>
+    <text x="360" y="12" fill="#d1d5db">v5.0.1</text>
+  </g>
+
+  
+  <g stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" opacity="0.3" fill="none">
+    <path d="M 870 20 L 880 20 L 880 30"></path>
+    <path d="M 870 240 L 880 240 L 880 230"></path>
+    <path d="M 30 20 L 20 20 L 20 30"></path>
+    <path d="M 30 240 L 20 240 L 20 230"></path>
+  </g>
+</svg>
