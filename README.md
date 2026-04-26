@@ -22,6 +22,8 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 
 ---
 If this project helped you, please ⭐️ star it to help others find it 
+>  **If you like OfflineLLM, you’ll ❤️ [Box](https://github.com/jegly/Box)** — a powerful on‑device AI experience with chat, voice, vision, and image generation.
+
 
 # Access Your Data Anytime, Anywhere
 
