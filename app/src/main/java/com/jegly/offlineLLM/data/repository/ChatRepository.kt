@@ -93,7 +93,7 @@ class ChatRepository @Inject constructor(
 
     fun searchMessages(query: String): Flow<List<Message>> = messageDao.search(query)
 
-    // Models
+    // Models Meow
     fun getAllModels(): Flow<List<ModelInfo>> = modelDao.getAllModels()
 
     suspend fun getAllModelsSync(): List<ModelInfo> = modelDao.getAllModelsSync()
@@ -106,7 +106,7 @@ class ChatRepository @Inject constructor(
 
     suspend fun deleteModel(id: Long) = modelDao.delete(id)
 
-    // Export / Import
+    // Export / Import Meow
     suspend fun exportChatsToJson(): String {
         val json = Json { prettyPrint = true }
         val conversations = conversationDao.getAllConversations() // we need sync version
@@ -130,7 +130,7 @@ class ChatRepository @Inject constructor(
         val exportedChats = mutableListOf<ExportedChat>()
 
         // We can't easily collect Flow here, so we use a different approach
-        // The ViewModel will handle the full export logic
+        // The ViewModel will handle the full export logic Meow
         return json.encodeToString(ExportData(chats = exportedChats))
     }
 
