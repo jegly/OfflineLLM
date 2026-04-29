@@ -213,8 +213,9 @@ OfflineLLM gives you full control over how the model generates text:
 ---
 
 ## License
+<img src="https://github.com/jegly/OfflineLLM/blob/main/Screenshots/Apache_Software_Foundation.png?raw=true" alt="Apache Software Foundation Logo" width="120">
 
-Apache License 2.0
+Apache License 2.0 
 
 llama.cpp backend: MIT License. Native wrapper adapted from [SmolChat-Android](https://github.com/shubham0204/SmolChat-Android) (Apache 2.0).
 
