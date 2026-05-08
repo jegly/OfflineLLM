@@ -20,6 +20,8 @@ No internet. No cloud. No tracking. Your conversations stay yours.
 <a href="https://www.buymeacoffee.com/jegly"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" height="41" width="174"></a> 
 </div>
 
+[![Download APK](https://img.shields.io/badge/Download-APK%20v5.0.1-brightgreen?style=for-the-badge&logo=android)](https://github.com/jegly/OfflineLLM/releases/download/5.0.1/OfflineLLM-5.0.1.apk)
+
 ---
 If this project helped you, please ⭐️ star it to help others find it 
 >  **If you like OfflineLLM, you’ll ❤️ [Box](https://github.com/jegly/Box)** — a powerful on‑device AI experience with chat, voice, vision, and image generation.
