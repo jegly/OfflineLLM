@@ -24,6 +24,7 @@
         android:memtagMode="sync"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:largeHeap="true
         android:theme="@style/Theme.OfflineLLM"
         tools:targetApi="37">
 
