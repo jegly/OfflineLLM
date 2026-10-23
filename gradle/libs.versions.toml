@@ -17,7 +17,7 @@ security-crypto = "1.1.0"
 biometric = "1.4.0-alpha07"
 core-ktx = "1.19.1"
 core-splashscreen = "1.2.0"
-serialization = "1.11.0"
+serialization = "1.12.0"
 # Capped by the Kotlin version: 0.42.0+ is built against Kotlin 2.4.0, whose
 # metadata a 2.3.x compiler may reject. 0.41.0 is built against 2.3.21 exactly.
 # Bump this in lockstep with kotlin once KSP ships a 2.4.x release.
