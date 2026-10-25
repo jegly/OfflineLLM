@@ -14,8 +14,8 @@ android {
         applicationId = "com.jegly.offlineLLM"
         minSdk = 33
         targetSdk = 37
-        versionCode = 9
-        versionName = "5.1.1"
+        versionCode = 10
+        versionName = "5.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += "arm64-v8a"
