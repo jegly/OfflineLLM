@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.1"
+agp = "9.5.0"
 # Kotlin stays on the 2.3 series: KSP has no 2.4.x release yet and Hilt/Room
 # annotation processing runs through KSP.
 kotlin = "2.4.21"
