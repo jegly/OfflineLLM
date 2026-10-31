@@ -1,0 +1,60 @@
+# Builds the release APK (unsigned) on every push to main and every PR,
+# including Dependabot's. No releases, no signing.
+# The first build compiles llama.cpp and ~1,400 Vulkan shaders (~20-30 min).
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Assemble release (unsigned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true # llama.cpp
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # NDK version is read from smollm/build.gradle.kts so it stays in sync.
+      # Khronos headers for llama.cpp's Vulkan backend (see README, "Build from source"):
+      # always the newest release tag of each, recorded in the run summary.
+      - name: Install NDK and Khronos headers
+        run: |
+          ndk=$(grep -oP 'ndkVersionPinned = "\K[^"]+' smollm/build.gradle.kts)
+          newest() { git ls-remote --tags --refs "$1" "$2" | sed 's#.*refs/tags/##' | sort -V | tail -n1; }
+          vulkan=$(newest https://github.com/KhronosGroup/Vulkan-Headers.git 'v1.*')
+          spirv=$(newest https://github.com/KhronosGroup/SPIRV-Headers.git 'vulkan-sdk-*')
+          echo "NDK $ndk, Vulkan-Headers $vulkan, SPIRV-Headers $spirv" | tee -a "$GITHUB_STEP_SUMMARY"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk" > /dev/null
+          git clone --quiet --depth 1 --branch "$vulkan" https://github.com/KhronosGroup/Vulkan-Headers.git
+          git clone --quiet --depth 1 --branch "$spirv" https://github.com/KhronosGroup/SPIRV-Headers.git
+          cmake -S SPIRV-Headers -B SPIRV-Headers/build -DCMAKE_INSTALL_PREFIX=SPIRV-Headers/install
+          cmake --install SPIRV-Headers/build
+
+      # Also validates gradle-wrapper.jar against Gradle's published checksums.
+      - uses: gradle/actions/setup-gradle@v6
+
+      - run: ./gradlew :app:assembleRelease
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 14

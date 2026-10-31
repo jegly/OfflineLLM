@@ -1,0 +1,138 @@
+# Builds an unsigned release APK and attaches it to a new *draft* GitHub release.
+# Run it from the Actions tab (Release > Run workflow). Then download the APK,
+# sign it locally, upload the signed APK to the draft and publish.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version like 1.2.3. Leave empty to bump the patch of the latest version."
+        required: false
+        default: ""
+      notes:
+        description: "Optional text shown above the generated release notes."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build unsigned APK and draft release
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      INPUT_VERSION: ${{ inputs.version }}
+      INPUT_NOTES: ${{ inputs.notes }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # tags are needed to work out the version
+          submodules: true # llama.cpp
+
+      - name: Work out version
+        id: ver
+        run: |
+          semver='^[0-9]+\.[0-9]+\.[0-9]+$'
+          # Latest of: the latest published release, and the versionName default
+          # in Gradle. Not the highest tag: some repos have stray old tags.
+          last_raw=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+          last_tag=$(echo "$last_raw" | sed 's/^v//' | grep -E "$semver" || true)
+          file_ver=$(grep -hoE 'appVersionName"\)\.getOrElse\("[0-9]+\.[0-9]+\.[0-9]+"' app/build.gradle* | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+          latest=$(printf '%s\n' $last_tag $file_ver | sort -V | tail -n1)
+
+          version="${INPUT_VERSION#v}"
+          if [[ -z "$version" ]]; then
+            if [[ -z "$latest" ]]; then
+              echo "::error::No previous version found. Enter one, e.g. 1.0.0."; exit 1
+            fi
+            IFS=. read -r ma mi pa <<< "$latest"
+            version="$ma.$mi.$((pa + 1))"
+          fi
+
+          if [[ ! "$version" =~ ^([0-9]+)\.([0-9]{1,2})\.([0-9]{1,2})$ ]]; then
+            echo "::error::Version must look like 1.2.3, with minor and patch 0-99 (got '$version')."; exit 1
+          fi
+          code=$(( 10#${BASH_REMATCH[1]} * 10000 + 10#${BASH_REMATCH[2]} * 100 + 10#${BASH_REMATCH[3]} ))
+
+          if [[ -n "$latest" ]] && { [[ "$version" == "$latest" ]] || [[ "$(printf '%s\n' "$latest" "$version" | sort -V | tail -n1)" != "$version" ]]; }; then
+            echo "::error::$version is not higher than the latest version $latest."; exit 1
+          fi
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "::error::A release or draft named v$version already exists."; exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "::error::Tag v$version already exists."; exit 1
+          fi
+
+          {
+            echo "version=$version"
+            echo "code=$code"
+            echo "last_tag=${last_tag:+$last_raw}" # real tag name; older ones have no "v"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing **v$version** (versionCode $code). Previous tag: ${last_tag:-none}" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # NDK version is read from smollm/build.gradle.kts so it stays in sync.
+      # Khronos headers for llama.cpp's Vulkan backend (see README, "Build from source"):
+      # always the newest release tag of each, recorded in the run summary.
+      - name: Install NDK and Khronos headers
+        run: |
+          ndk=$(grep -oP 'ndkVersionPinned = "\K[^"]+' smollm/build.gradle.kts)
+          newest() { git ls-remote --tags --refs "$1" "$2" | sed 's#.*refs/tags/##' | sort -V | tail -n1; }
+          vulkan=$(newest https://github.com/KhronosGroup/Vulkan-Headers.git 'v1.*')
+          spirv=$(newest https://github.com/KhronosGroup/SPIRV-Headers.git 'vulkan-sdk-*')
+          echo "NDK $ndk, Vulkan-Headers $vulkan, SPIRV-Headers $spirv" | tee -a "$GITHUB_STEP_SUMMARY"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk" > /dev/null
+          git clone --quiet --depth 1 --branch "$vulkan" https://github.com/KhronosGroup/Vulkan-Headers.git
+          git clone --quiet --depth 1 --branch "$spirv" https://github.com/KhronosGroup/SPIRV-Headers.git
+          cmake -S SPIRV-Headers -B SPIRV-Headers/build -DCMAKE_INSTALL_PREFIX=SPIRV-Headers/install
+          cmake --install SPIRV-Headers/build
+
+      # Also validates gradle-wrapper.jar against Gradle's published checksums.
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build unsigned release APK
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          CODE: ${{ steps.ver.outputs.code }}
+        run: ./gradlew :app:assembleRelease -PappVersionCode="$CODE" -PappVersionName="$VERSION"
+
+      - name: Create draft release
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          LAST_TAG: ${{ steps.ver.outputs.last_tag }}
+        run: |
+          # Fails here if the build was signed, since the file name would differ.
+          apk="${GITHUB_REPOSITORY#*/}-$VERSION-unsigned.apk"
+          cp app/build/outputs/apk/release/app-release-unsigned.apk "$apk"
+
+          args=(-f tag_name="v$VERSION" -f target_commitish="$GITHUB_SHA")
+          [[ -n "$LAST_TAG" ]] && args+=(-f previous_tag_name="$LAST_TAG")
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${args[@]}" --jq .body > generated.md
+          {
+            [[ -n "$INPUT_NOTES" ]] && printf '%s\n\n' "$INPUT_NOTES"
+            cat generated.md
+          } > notes.md
+
+          # Create the tag here rather than on publish: publishing a draft that
+          # still has to create its tag failed on GitHub's side (HTTP 500).
+          git tag "v$VERSION" "$GITHUB_SHA"
+          git push origin "refs/tags/v$VERSION"
+          if ! gh release create "v$VERSION" "$apk" --draft --verify-tag \
+              --title "v$VERSION" --notes-file notes.md; then
+            git push --delete origin "refs/tags/v$VERSION"
+            exit 1
+          fi
+          echo "Draft release v$VERSION created on tag v$VERSION with $apk" >> "$GITHUB_STEP_SUMMARY"

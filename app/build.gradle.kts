@@ -14,8 +14,9 @@ android {
         applicationId = "com.jegly.offlineLLM"
         minSdk = 33
         targetSdk = 37
-        versionCode = 11
-        versionName = "5.1.3"
+        // CI release builds pass these; local builds use the defaults.
+        versionCode = providers.gradleProperty("appVersionCode").map(String::toInt).getOrElse(11)
+        versionName = providers.gradleProperty("appVersionName").getOrElse("5.1.3")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += "arm64-v8a"
