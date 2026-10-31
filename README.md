@@ -10,7 +10,7 @@ The only Android LLM app that has 0 Network connectivity. All LLM inference runs
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3-111111.svg?logo=kotlin&logoColor=white&labelColor=142838&color=8ff586)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-13%2B-111111.svg?logo=android&logoColor=white&labelColor=142838&color=8ff586)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-5.1.3-111111.svg?labelColor=142838&color=8ff586)](https://github.com/jegly/OfflineLLM/releases)
+[![Version](https://img.shields.io/badge/Version-5.1.4-111111.svg?labelColor=142838&color=8ff586)](https://github.com/jegly/OfflineLLM/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-111111.svg?labelColor=142838&color=8ff586)](LICENSE)
 [![llama.cpp](https://img.shields.io/badge/llama.cpp-GGUF-111111.svg?labelColor=142838&color=8ff586)](https://github.com/ggerganov/llama.cpp)
 [![GPU](https://img.shields.io/badge/GPU-Vulkan%20Accelerated-111111.svg?labelColor=142838&color=8ff586)]()
@@ -77,7 +77,7 @@ If this project helped you, please ⭐️ star it. **Also try [Box](https://gith
 
 ## Install
 
-v5.1.3 ships as a single **Vanilla** APK — bring your own GGUF model and import it from Settings.
+v5.1.4 ships as a single **Vanilla** APK — bring your own GGUF model and import it from Settings.
 
 > **Requires Android 13+ and arm64-v8a.** Vast majority of Android devices since 2019 are arm64.
 
@@ -89,7 +89,7 @@ v5.1.3 ships as a single **Vanilla** APK — bring your own GGUF model and impor
 Or via ADB:
 
 ```bash
-adb install OfflineLLM-5.1.3-PQC-signed.apk
+adb install OfflineLLM-5.1.4-PQC-signed.apk
 ```
 
 **Tamper detection:** release builds verify the APK signing certificate at launch. The app exits with an "Unverified App" dialog if anyone has re-signed the APK with a different key. On Android 17 and newer it accepts only the ML-DSA-87 key; earlier versions accept the original key.
@@ -126,9 +126,10 @@ git clone --recurse-submodules https://github.com/jegly/OfflineLLM.git
 cd OfflineLLM
 
 # Khronos headers for the Vulkan GPU backend (inside the project root).
-# Vulkan-Headers is pinned to the tag ggml-vulkan is known to build against.
-git clone --branch v1.4.351 --depth 1 https://github.com/KhronosGroup/Vulkan-Headers.git
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git
+# The newest release tag of each, the same ones CI builds with.
+newest() { git ls-remote --tags --refs "$1" "$2" | sed 's#.*refs/tags/##' | sort -V | tail -n1; }
+git clone --depth 1 --branch "$(newest https://github.com/KhronosGroup/Vulkan-Headers.git 'v1.*')" https://github.com/KhronosGroup/Vulkan-Headers.git
+git clone --depth 1 --branch "$(newest https://github.com/KhronosGroup/SPIRV-Headers.git 'vulkan-sdk-*')" https://github.com/KhronosGroup/SPIRV-Headers.git
 cmake -S SPIRV-Headers -B SPIRV-Headers/build -DCMAKE_INSTALL_PREFIX=SPIRV-Headers/install
 cmake --install SPIRV-Headers/build
 
@@ -172,13 +173,13 @@ Release APKs use hybrid signing (APK Signature Scheme v3.2): the original app ke
 
 | File | SHA-256 |
 | --- | --- |
-| `OfflineLLM-5.1.3-PQC-signed.apk` | `0f2460fc339f017dbfeea694cf1caaede215aaded6715b8ca0f6eaebccba4092` |
+| `OfflineLLM-5.1.4-PQC-signed.apk` | `bacb2b58a9df3ce33775591ec979163f8b147b6d532d522c9faf7f9a764606bd` |
 
 Verify a download:
 
 ```bash
-sha256sum OfflineLLM-5.1.3-PQC-signed.apk
-apksigner verify -v --print-certs OfflineLLM-5.1.3-PQC-signed.apk   # build-tools 37.0.0 on JDK 25 shows all three keys
+sha256sum OfflineLLM-5.1.4-PQC-signed.apk
+apksigner verify -v --print-certs OfflineLLM-5.1.4-PQC-signed.apk   # build-tools 37.0.0 on JDK 25 shows all three keys
 ```
 
 Signing certificate SHA-256:
