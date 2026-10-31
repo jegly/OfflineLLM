@@ -1,0 +1,9 @@
+# Groups the auto-generated release notes. Dependabot labels its PRs "dependencies".
+changelog:
+  categories:
+    - title: Changes
+      labels: ["*"]
+      exclude:
+        labels: [dependencies]
+    - title: Dependency updates
+      labels: [dependencies]
