@@ -171,22 +171,31 @@ First build compiles llama.cpp from source, including ~1,400 Vulkan compute shad
 
 Release APKs use hybrid signing (APK Signature Scheme v3.2): the original app key plus an EC P-384 key and an ML-DSA-87 post-quantum key. Android 17 and newer verify the hybrid block, where the ML-DSA-87 key is the signer; earlier Android versions verify the original key as before.
 
-| File | SHA-256 |
-| --- | --- |
-| `OfflineLLM-5.1.4-PQC-signed.apk` | `bacb2b58a9df3ce33775591ec979163f8b147b6d532d522c9faf7f9a764606bd` |
+### Checksums
 
-Verify a download:
+| File | SHA-256 |
+|---|---|
+| `OfflineLLM-5.1.4-PQC-signed.apk` | *sha256:bacb2b58a9df3ce33775591ec979163f8b147b6d532d522c9faf7f9a764606bd* |
+
+### Signing certificate
+
+Use this fingerprint with [Obtainium AppVerifier](https://github.com/ImranR98/Obtainium) to verify the APK was signed by the correct key before installing:
+
+**Certificate SHA-256:** `98d324d4106a368c62729a0a24d9ac9a6b47f8ac4c6585348531f0ee4eb6a04c`
+
+On Android 17 and later the APK is also verified through its post-quantum APK Signature Scheme v3.2 hybrid block:
+
+| v3.2 signer | Certificate SHA-256 |
+|---|---|
+| PQC (ML-DSA-87) | `5f99de5b3195753d4fe8ddabebd2fb27356b2109d6fbb2471fcbbdf21a9e76a6` |
+| Hybrid classical (EC P-384) | `fa8f4a07e6a4f2b7dc6e5ab31fc05592b1414ab9436d1e2e39b35ce3bb2e33a2` |
+
+Verify a download (`apksigner` from build-tools 37.0.0 on JDK 25 shows all three keys):
 
 ```bash
 sha256sum OfflineLLM-5.1.4-PQC-signed.apk
-apksigner verify -v --print-certs OfflineLLM-5.1.4-PQC-signed.apk   # build-tools 37.0.0 on JDK 25 shows all three keys
+apksigner verify --print-certs OfflineLLM-5.1.4-PQC-signed.apk | grep SHA-256
 ```
-
-Signing certificate SHA-256:
-
-- ML-DSA-87 (post-quantum): `5f99de5b3195753d4fe8ddabebd2fb27356b2109d6fbb2471fcbbdf21a9e76a6`
-- EC P-384 (hybrid classical): `fa8f4a07e6a4f2b7dc6e5ab31fc05592b1414ab9436d1e2e39b35ce3bb2e33a2`
-- Original key: `98d324d4106a368c62729a0a24d9ac9a6b47f8ac4c6585348531f0ee4eb6a04c`
 
 ## License
 
