@@ -3,7 +3,7 @@ agp = "9.5.0"
 # Kotlin stays on the 2.3 series: KSP has no 2.4.x release yet and Hilt/Room
 # annotation processing runs through KSP.
 kotlin = "2.4.21"
-ksp = "2.3.12"
+ksp = "2.3.13"
 compose-bom = "2026.09.00"
 activity-compose = "1.13.0"
 navigation-compose = "2.10.2"
