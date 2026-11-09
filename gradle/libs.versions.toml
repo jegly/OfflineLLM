@@ -14,7 +14,7 @@ room = "2.8.5"
 coroutines = "1.11.0"
 security-crypto = "1.1.0"
 # No stable 1.4.x yet; 1.1.0 would lose the newer BiometricPrompt APIs.
-biometric = "1.4.0-alpha07"
+biometric = "1.4.0-beta01"
 core-ktx = "1.19.1"
 core-splashscreen = "1.2.0"
 serialization = "1.12.0"
