@@ -2,7 +2,7 @@
 // ship in the APK; constraints lift them to patched releases.
 buildscript {
     val nettyVersion = "4.2.20.Final"
-    val bouncyCastleVersion = "1.86"
+    val bouncyCastleVersion = "1.87"
     dependencies {
         constraints {
             classpath("io.netty:netty-buffer:$nettyVersion")
