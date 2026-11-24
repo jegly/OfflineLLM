@@ -1,7 +1,7 @@
 // Build-tool transitives (AGP / Kotlin / Hilt plugin classpath) that Dependabot flags. They never
 // ship in the APK; constraints lift them to patched releases.
 buildscript {
-    val nettyVersion = "4.2.20.Final"
+    val nettyVersion = "4.2.21.Final"
     val bouncyCastleVersion = "1.87"
     dependencies {
         constraints {
