@@ -8,16 +8,24 @@ plugins {
 
 android {
     namespace = "com.jegly.offlineLLM"
-    compileSdk = 37
+
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
 
     defaultConfig {
         applicationId = "com.jegly.offlineLLM"
         minSdk = 33
         targetSdk = 37
+
         // CI release builds pass these; local builds use the defaults.
         versionCode = providers.gradleProperty("appVersionCode").map(String::toInt).getOrElse(11)
         versionName = providers.gradleProperty("appVersionName").getOrElse("5.1.3")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         ndk {
             abiFilters += "arm64-v8a"
         }
@@ -27,6 +35,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -38,19 +47,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+
         jniLibs {
             // ggml discovers its backend plugins (libggml-cpu-android_*.so,
-            // libggml-vulkan.so) by scanning nativeLibraryDir at runtime. With the
-            // modern default (libs left compressed inside the APK) that directory
-            // is empty and no backend can load — so extract them to disk.
+            // libggml-vulkan.so) by scanning nativeLibraryDir at runtime.
+            // Extract native libraries so backends can load correctly.
             useLegacyPackaging = true
         }
     }
