@@ -1,5 +1,6 @@
 package com.jegly.offlineLLM.ui.screens
 
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
